@@ -1,7 +1,6 @@
 #include "queue.h"
 #include "board.h"
-
-Queue::Queue(sf::RenderWindow &w): current(),
+Queue::Queue(sf::RenderWindow &w): current(""),
                                    upcoming(),
                                    hold(),
                                    window(w),
@@ -16,7 +15,9 @@ void Queue::gen() {
     for (auto x : bag) {
         upcoming.push_back(x);
     }
-    if (current.empty()) Pop();
+    if (!upcoming.empty()) {
+        if (current.empty()) Pop();
+    }
 }
 
 void Queue::drawHold() {
@@ -27,7 +28,7 @@ void Queue::drawHold() {
 
     for (auto pr : v) {
         sf::RectangleShape block(sf::Vector2f(30,30));
-        block.setPosition(15 + pr.x * 30, -325 + (20 - pr.y) * 30);
+        block.setPosition(15 + pr.x * 30, 150 + (20 - pr.y) * 30);
         block.setFillColor(clrIdentify(hold));
         window.draw(block);
     }
@@ -35,12 +36,12 @@ void Queue::drawHold() {
 
 void Queue::drawQueue() {
     //the left is 475, the right is 595
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < min(5,(int)upcoming.size()); i++) {
         Piece queuepiece = Piece(upcoming[i],board222,window);
         vector<Point> v = queuepiece.getCoords();
         for (auto pr : v) {
             sf::RectangleShape block(sf::Vector2f(30,30));
-            block.setPosition(500 + pr.x * 30,  (80 * i) + -325 + (20 - pr.y) * 30);
+            block.setPosition(400 + pr.x * 30,  (80 * i) + 150 + (20 - pr.y) * 30);
             block.setFillColor(clrIdentify(upcoming[i]));
             window.draw(block);
         }

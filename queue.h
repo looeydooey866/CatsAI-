@@ -1,6 +1,7 @@
 //
 // Created by admin on 10/10/2024.
 //
+#pragma once
 #include "board.h"
 #include "piece.h"
 #ifndef QUEUE_H

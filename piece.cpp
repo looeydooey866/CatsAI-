@@ -2,13 +2,17 @@
 #include <SFML/Graphics.hpp>
 #include <utility>
 #include <ext/pb_ds/assoc_container.hpp>
+
+#include "myheap.h"
 using namespace std;
 #include "board.h"
 #include "point.h"
 #include "piece.h"
 
-Piece::Piece(string p, Board &b, sf::RenderWindow &w): piece(std::move(p)), rotations(0), coords(0, 0), board(b), window(w) {
+Piece::Piece(std::string p, Board& b, sf::RenderWindow& w)
+    : piece(p), board(b), window(w), rotations(0), coords(Point(0,0)) {
     updateBitset();
+    spawn();
 }
 
 bitset<16> Piece::getBitset() {
@@ -26,7 +30,7 @@ void Piece::updateBitset() {
     boundingBox = getBitset();
 }
 
-int Piece::getOset() {
+int Piece::getOset() const {
     if (piece == "O") {
         return 4;
     }
@@ -41,7 +45,7 @@ void Piece::spawn() {
     boundingBox = getBitset();
 }
 
-bool Piece::isNotColliding() {
+bool Piece::isNotColliding() const {
     bitset<40> blockblock;
 
     for (int i=0;i<4;i++) {
@@ -155,7 +159,7 @@ Point Piece::cwKickCheck() {
             return kick;
         }
     }
-    return Point(-866,-866);
+    return {-866,-866};
 }
 
 Point Piece::ccwKickCheck() {
@@ -172,10 +176,10 @@ Point Piece::ccwKickCheck() {
             return kick;
         }
     }
-    return Point(-866,-866);
+    return {-866,-866};
 }
 
-vector<vector<Point>> Piece::getCWKickData() {
+vector<vector<Point>> Piece::getCWKickData() const {
     if (set<string>{"S","Z","J","L","T"}.contains(piece)) {
         return {
             {
@@ -245,7 +249,7 @@ vector<vector<Point>> Piece::getCWKickData() {
     }
 }
 
-vector<vector<Point>> Piece::getCCWKickData() {
+vector<vector<Point>> Piece::getCCWKickData() const {
     if (set<string>{"S","Z","J","L","T"}.contains(piece)) {
         return {
                 {
@@ -322,18 +326,20 @@ vector<Point> Piece::getCoords() {
     vector<Point> ans;
     for (int i=0;i<16;i++) {
         if (boundingBox[i]) {
-            ans.push_back(Point(3-(i%4)+coords.x,i/4 + coords.y));
+            ans.emplace_back(3-(i%4)+coords.x,i/4 + coords.y);
         }
     }
     return ans;
 }
 
 void Piece::placePiece() {
-    if (!isNotColliding()) __gnu_cxx::__throw_concurrence_broadcast_error();
-    vector<Point> coords = getCoords();
-    for (auto coord : coords) {
+    if (!isNotColliding()) {
+        cerr << "Yo, line 336 of piece.cpp! HEEEEEELLLLLLLLLPPPPPPPP";
+        vector<int> bruhh(1LL<<9999999999);
+    }
+    for (vector<Point> coords = getCoords(); auto coord : coords) {
         board.coloredBoard[coord.y][coord.x] = piece;
-        board.bitBoard[9 - coord.x + 10 * coord.y] = 1;
+        board.bitBoard[9 - coord.x + 10 * coord.y] = true;
     }
 }
 
@@ -342,15 +348,15 @@ void Piece::draw() {
     vector<Point> v = getCoords();
     for (auto pr : v) {
         sf::RectangleShape block(sf::Vector2f(30,30));
-        block.setPosition(150 + pr.x * 30, 150 + (20 - pr.y) * 30);
+        block.setPosition(pr.x * 30 + 150, (20 - pr.y) * 30 + 150);
         block.setFillColor(clrIdentify(piece));
         window.draw(block);
     }
 }
 
-int Piece::getLeftSpace() {
+int Piece::getLeftSpace() const {
     int ans = 0;
-    bitset<16> LEFTMASK = bitset<16>("1000100010001000");
+    auto LEFTMASK = bitset<16>("1000100010001000");
     while ((LEFTMASK & boundingBox).none()) {
         LEFTMASK >>= 1;
         ans++;
@@ -358,9 +364,9 @@ int Piece::getLeftSpace() {
     return ans;
 }
 
-int Piece::getRightSpace() {
+int Piece::getRightSpace() const {
     int ans = 0;
-    bitset<16> RIGHTMASK = bitset<16>("000100010001");
+    auto RIGHTMASK = bitset<16>("000100010001");
     while ((RIGHTMASK & boundingBox).none()) {
         RIGHTMASK <<= 1;
         ans++;
@@ -368,95 +374,86 @@ int Piece::getRightSpace() {
     return ans;
 }
 
-void Piece::stringToMove(string s) {
-    if (s=="dasleft") {
+void Piece::stringToMove(const string& currentMoveBeingProcessed) {
+    if (currentMoveBeingProcessed=="dasleft") {
         dasleft();
     }
-    else if (s=="dasright") {
+    else if (currentMoveBeingProcessed=="dasright") {
         dasright();
     }
-    else if (s=="left") {
+    else if (currentMoveBeingProcessed=="left") {
         left();
     }
-    else if (s=="right") {
+    else if (currentMoveBeingProcessed=="right") {
         right();
     }
-    else if (s=="sd") {
+    else if (currentMoveBeingProcessed=="sd") {
         sd();
     }
-    else if (s=="cw") {
+    else if (currentMoveBeingProcessed=="cw") {
         cw();
     }
-    else if (s=="ccw") {
+    else if (currentMoveBeingProcessed=="ccw") {
         ccw();
     }
 }
 
-inline long long hahs(Point point, int rotations) {
+inline long long posHash(Point point, int rotations) {
     return (long long)point.x + (long long)point.y << 4 + (long long) rotations << 6;
 }
 
-/*vector<pair<vector<string>, Piece>> Piece::getEndPositions() {
+vector<pair<vector<string>, Piece>> Piece::getEndPositions() {
+    //
+    // WORK IN PROGRESS
+    //
     __gnu_pbds::gp_hash_table<long long, bool> visited;
     Piece copyOfPiece = *this;
     copyOfPiece.spawn();
     vector<pair<vector<string>, Piece>> endPos;
     unordered_map<long long, vector<string>> paths;
+    MyHeap pq;
 
-    // Comparator to use in the priority queue
-    auto cmp = [&paths](const Piece& a, const Piece& b) {
-        long long hashA = hahs(a.coords, a.rotations);
-        long long hashB = hahs(b.coords, b.rotations);
-        return paths[hashA].size() > paths[hashB].size(); // Min-heap based on path lengths
-    };
+    pq.insert(copyOfPiece,0);
+    paths[posHash(copyOfPiece.coords, copyOfPiece.rotations)] = {""};
 
-    // Initialize the priority queue with the custom comparator
-    priority_queue<Piece, vector<Piece>, decltype(cmp)> pq(cmp);
-
-    pq.push(Piece(copyOfPiece.piece,copyOfPiece.board,copyOfPiece.window));
-    paths[hahs(copyOfPiece.coords, copyOfPiece.rotations)] = {""};
-
-    while (!pq.empty()) {
+    while (!pq.pieces.empty()) {
         Piece curpiece = pq.top();
         pq.pop();
 
-        long long currentHash = hahs(curpiece.coords, curpiece.rotations);
+        long long currentHash = posHash(curpiece.coords, curpiece.rotations);
         if (visited[currentHash]) {
-            continue; // Skip if already visited
+            continue;
         }
         visited[currentHash] = true;
 
-        // Check if the current piece cannot move down, indicating it's an end position
         if (!curpiece.canMoveDown()) {
-            endPos.emplace_back(paths[currentHash], curpiece); // Store path and piece
+            endPos.emplace_back(paths[currentHash], curpiece);
         }
 
-        // Loop through possible moves
         for (const auto& move : moves) {
             vector<string> moveHistory = paths[currentHash];
-            // Avoid reversing the last move
             if ((move == "l" && !moveHistory.empty() && moveHistory.back() == "r") ||
                 (move == "r" && !moveHistory.empty() && moveHistory.back() == "l") ||
                 (move == "sd" && !moveHistory.empty() && moveHistory.back() == "sd") ||
                 (move == "dasleft" && !moveHistory.empty() && moveHistory.back() == "dasleft") ||
                 (move == "dasright" && !moveHistory.empty() && moveHistory.back() == "dasright")) {
-                continue; // Skip invalid moves
+                continue;
             }
 
             Piece newpiece = curpiece;
-            newpiece.stringToMove(move); // Apply the move
+            newpiece.stringToMove(move);
             moveHistory.push_back(move);
 
-            long long newHash = hahs(newpiece.coords, newpiece.rotations);
-            // Update paths if the new path is shorter
+            long long newHash = posHash(newpiece.coords, newpiece.rotations);
+
             if (paths.find(newHash) == paths.end() || moveHistory.size() < paths[newHash].size()) {
                 paths[newHash] = moveHistory;
-                pq.push(newpiece); // Add new piece state to the queue
+                pq.insert(newpiece,5);
             }
         }
     }
-    return endPos; // Return collected end positions
-}*/
+    return endPos;
+}
 
 
 

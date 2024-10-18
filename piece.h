@@ -4,87 +4,72 @@
 
 #ifndef PIECE_H
 #define PIECE_H
-#include "board.h"
+
+#include <bits/stdc++.h>
+
+struct Board;
 #include "point.h"
 
-inline vector<string> moves = {"dasleft","dasright","left","right","cw","ccw","sd"};
+#include <SFML/Graphics.hpp>
 
-
+inline std::vector<std::string> moves = {"dasleft","dasright","left","right","cw","ccw","sd"};
 
 struct Piece {
-    string piece;
+    std::string piece;
     int rotations;
     Point coords;
-    bitset<16> boundingBox;
+    std::bitset<16> boundingBox;
     Board& board;
     sf::RenderWindow& window;
-    Piece(string p, Board& b, sf::RenderWindow& w);
 
+    Piece(std::string p, Board& b, sf::RenderWindow& w);
 
-
-    bitset<16> getBitset();
-
+    std::bitset<16> getBitset();
     void updateBitset();
-
-    int getOset();
-
+    int getOset() const;
     void spawn();
-
-    [[nodiscard]] bool isNotColliding();
-
+    [[nodiscard]] bool isNotColliding() const;
     bool canMoveLeft();
-
     bool canMoveRight();
-
     void left();
-
     void right();
-
     void dasleft();
-
     void dasright();
-
     bool canMoveDown();
-
     void sd();
-
     void cw();
-
     void ccw();
-
     Point cwKickCheck();
-
     Point ccwKickCheck();
+    std::vector<std::vector<Point>> getCWKickData() const;
+    std::vector<std::vector<Point>> getCCWKickData() const;
 
-    vector<vector<Point>> getCWKickData();
+    //turned these into integers to ease on the eyes
+    const std::array<std::bitset<16>, 4> TBITSET = {std::bitset<16>(1248), std::bitset<16>(1124), std::bitset<16>(228), std::bitset<16>(1220)};
+    const std::array<std::bitset<16>, 4> SBITSET = {std::bitset<16>(1728), std::bitset<16>(1122), std::bitset<16>(108), std::bitset<16>(2244)};
+    const std::array<std::bitset<16>, 4> ZBITSET = {std::bitset<16>(3168), std::bitset<16>(612), std::bitset<16>(198), std::bitset<16>(1224)};
+    const std::array<std::bitset<16>, 4> IBITSET = {std::bitset<16>(3840), std::bitset<16>(8738), std::bitset<16>(240), std::bitset<16>(17476)};
+    const std::array<std::bitset<16>, 4> OBITSET = {std::bitset<16>(1632), std::bitset<16>(1632), std::bitset<16>(1632), std::bitset<16>(1632)};
+    const std::array<std::bitset<16>, 4> LBITSET = {std::bitset<16>(736), std::bitset<16>(1094), std::bitset<16>(232), std::bitset<16>(3140)};
+    const std::array<std::bitset<16>, 4> JBITSET = {std::bitset<16>(2272), std::bitset<16>(1604), std::bitset<16>(226), std::bitset<16>(1100)};
 
-    vector<vector<Point>> getCCWKickData();
-
-    const array<bitset<16>,4> TBITSET = {bitset<16>(1248),bitset<16>(1124),bitset<16>(228),bitset<16>(1220)};
-    const array<bitset<16>,4> SBITSET = {bitset<16>(1728),bitset<16>(1122),bitset<16>(108),bitset<16>(2244)};
-    const array<bitset<16>,4> ZBITSET = {bitset<16>(3168),bitset<16>(612),bitset<16>(198),bitset<16>(1224)};
-    const array<bitset<16>,4> IBITSET = {bitset<16>(3840),bitset<16>(8738),bitset<16>(240),bitset<16>(17476)};
-    const array<bitset<16>,4> OBITSET = {bitset<16>(1632),bitset<16>(1632),bitset<16>(1632),bitset<16>(1632)};
-    const array<bitset<16>,4> LBITSET = {bitset<16>(736),bitset<16>(1094),bitset<16>(232),bitset<16>(3140)};
-    const array<bitset<16>,4> JBITSET = {bitset<16>(2272),bitset<16>(1604),bitset<16>(226),bitset<16>(1100)};
-
-    vector<Point> getCoords();
-
+    std::vector<Point> getCoords();
     void placePiece();
-
     void draw();
-
-    int getLeftSpace();
-
-    int getRightSpace();
-
-    void stringToMove(string s);
-
-    vector<pair<vector<string>,Piece>> getEndPositions();
+    int getLeftSpace() const;
+    int getRightSpace() const;
+    void stringToMove(const std::string& currentMoveBeingProcessed);
+    std::vector<std::pair<std::vector<std::string>, Piece>> getEndPositions();
 };
 
+inline void swapPiece(Piece& first, Piece& second) {
+    std::swap(first.piece, second.piece);
+    std::swap(first.boundingBox, second.boundingBox);
+    std::swap(first.coords.x,second.coords.x);
+    std::swap(first.coords.y,second.coords.y);
+    std::swap(first.rotations, second.rotations);
+}
 
+inline long long posHash(Point point, int rotations);
 
-inline long long hahs(Point point, int rotations);
-
-#endif //PIECE_H
+#endif

@@ -13,6 +13,7 @@ set(SOURCE_FILES main.cpp
         board.h
         point.h
         queue.cpp
+        myheap.h
 )
 
 add_executable(tetris ${SOURCE_FILES})
@@ -21,4 +22,4 @@ find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
 
 target_link_libraries(tetris sfml-system sfml-window sfml-graphics sfml-audio sfml-network)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -march=native -funroll-loops -fopt-info-vec-optimized")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -march=native -funroll-loops -fopt-info-vec-optimized")
