@@ -458,7 +458,6 @@ vector<pair<vector<string>, Piece> > Piece::getEndPositions() {
             Piece newpiece = curpiece;
             newpiece.stringToMove(move);
             moveHistory.push_back(move);
-
             bitset<250> newHash = posHash(newpiece);
 
             if (!paths.contains(newHash) || moveHistory.size() < paths[newHash].size()) {

@@ -29,7 +29,6 @@ struct MyHeap {
             }
         }
     }
-
     void pop() {
         swap(pieces[0].second,pieces[pieces.size()-1].second);
         swapPiece(pieces[0].first,pieces[pieces.size()-1].first);

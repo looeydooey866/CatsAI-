@@ -67,7 +67,6 @@ int main() {
         }
         now.piece="T";
         now.updateBitset();
-        //i should make this a function hmmmmmmmmmmmmmmmm
         auto positions = now.getEndPositions();
        //  for (int i=0;i<positions.size();i++) {
        //      for (int j=0;j<positions.size()-1;j++) {

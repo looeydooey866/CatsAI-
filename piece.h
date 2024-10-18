@@ -6,10 +6,8 @@
 #define PIECE_H
 
 #include <bits/stdc++.h>
-
 struct Board;
 #include "point.h"
-
 #include <SFML/Graphics.hpp>
 
 inline std::vector<std::string> moves = {"cw","ccw","dasleft","dasright","left","right","sd"};
