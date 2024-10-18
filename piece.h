@@ -12,7 +12,7 @@ struct Board;
 
 #include <SFML/Graphics.hpp>
 
-inline std::vector<std::string> moves = {"dasleft","dasright","left","right","cw","ccw","sd"};
+inline std::vector<std::string> moves = {"cw","ccw","dasleft","dasright","left","right","sd"};
 
 struct Piece {
     std::string piece;
@@ -21,6 +21,7 @@ struct Piece {
     std::bitset<16> boundingBox;
     Board& board;
     sf::RenderWindow& window;
+    std::string lastKick = "";
 
     Piece(std::string p, Board& b, sf::RenderWindow& w);
 
@@ -60,6 +61,9 @@ struct Piece {
     int getRightSpace() const;
     void stringToMove(const std::string& currentMoveBeingProcessed);
     std::vector<std::pair<std::vector<std::string>, Piece>> getEndPositions();
+
+    std::string tSpinCheck() const;
+    int getCollisions() const ;
 };
 
 inline void swapPiece(Piece& first, Piece& second) {
@@ -70,6 +74,6 @@ inline void swapPiece(Piece& first, Piece& second) {
     std::swap(first.rotations, second.rotations);
 }
 
-inline long long posHash(Point point, int rotations);
+inline std::bitset<250> posHash(Point point, int rotations);
 
 #endif

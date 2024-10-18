@@ -11,8 +11,8 @@ using namespace std;
 struct MyHeap {
     vector<pair<Piece,int>> pieces;
 
-    Piece top() {
-        return pieces[0].first;
+    pair<Piece,int> top() {
+        return pieces[0];
     }
 
     void insert(Piece x, int dist) {
@@ -35,8 +35,8 @@ struct MyHeap {
         swapPiece(pieces[0].first,pieces[pieces.size()-1].first);
         pieces.pop_back();
         int i = 0;
-        while (pieces[i].second > min(pieces[2*i+1].second,pieces[2*i+2].second)) {
-            if (pieces[2*i+1].second <= pieces[2*i+2].second) {
+        while (2*i+1 < pieces.size() && pieces[i].second > min(pieces[2*i+1].second,(2*i+2<pieces.size()?pieces[2*i+2].second:INT_MAX))) {
+            if (pieces[2*i+1].second <= (2*i+2<pieces.size()?pieces[2*i+2].second:INT_MAX)) {
                 swap(pieces[i].second,pieces[2*i+1].second);
                 swapPiece(pieces[i].first,pieces[2*i+1].first);
                 i = 2 * i + 1;
