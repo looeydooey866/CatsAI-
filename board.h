@@ -1,21 +1,82 @@
 // Board.h
 #ifndef BOARD_H
 #define BOARD_H
+#include "data.h"
 
-#include <bits/stdc++.h>
-#include <SFML/Graphics.hpp>
 using namespace std;
+
 sf::Color clrIdentify(string s);
 
-struct Board {
-    sf::RenderWindow& window;
-    vector<vector<string>> coloredBoard = vector<vector<string>>(25,vector<string>(10,"#"));
-    bitset<250> bitBoard;
-    explicit Board(sf::RenderWindow& w) : window(w) {}
+namespace Cattris {
+    class Piece;
 
-    void draw();
+    class Board {
+        public:
+            uint32_t board[10] = {false};
 
-    void clearLines();
-};
+        public:
+            uint32_t& operator [] (int index);
+            bool operator == (const Board& other);
 
+        public:
+            void set(const int8_t x, const int8_t y);
+
+            bool get(const int8_t x, const int8_t y);
+
+            void getHeightArray(uint8_t height[10]);
+
+            bool isSet(const int8_t x, int8_t y);
+
+            bool isTspin(Piece &p);
+
+            uint32_t getMask();
+
+            uint8_t fullLines();
+
+            void clearLines();
+
+            void print();
+    };
+
+    class CollisionMap {
+        public:
+            uint32_t map[4][10];
+
+        public:
+            void populate(Board& board, PIECE piece);
+
+            bool colliding(const int8_t x, const int8_t y, ROTATION rot, PIECE piece);
+
+            bool colliding(Piece &p);
+
+            void print(int rot);
+    };
+
+    class PosMap {
+        public:
+            bool map[4][10][25];
+
+        public:
+            PosMap();
+
+        public:
+            void clear();
+            void set(const int8_t x, const int8_t y, ROTATION r, bool value);
+            bool get(const int8_t x, const int8_t y, ROTATION r);
+    };
+
+    class GameBoard {
+        public:
+            string coloredBoard[10][25] = {"#"};
+
+        public:
+            void draw(sf::RenderWindow &window);
+
+            void clearLines();
+
+            void set(int x, int y, string type);
+
+            void clear();
+    };
+}
 #endif

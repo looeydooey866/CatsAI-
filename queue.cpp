@@ -1,15 +1,17 @@
 #include "queue.h"
 #include "board.h"
+#include <random>
+#include <chrono>
 Queue::Queue(sf::RenderWindow &w): current(""),
                                    upcoming(),
                                    hold(),
                                    window(w),
-                                   board222(w) {
+                                   board222() {
     gen();
 }
 
 void Queue::gen() {
-    mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
+    mt19937 rng(std::chrono::steady_clock::now().time_since_epoch().count());
     vector<string> bag = {"J","L","S","Z","I","O","T"};
     shuffle(bag.begin(),bag.end(),rng);
     for (auto x : bag) {
@@ -20,38 +22,7 @@ void Queue::gen() {
     }
 }
 
-void Queue::drawHold() {
-    if (hold.empty()) return;
-    //the left is 15, the right is 135
-    Piece holdpiece = Piece(hold,board222,window);
-    vector<Point> v = holdpiece.getCoords();
 
-    for (auto pr : v) {
-        sf::RectangleShape block(sf::Vector2f(30,30));
-        block.setPosition(15 + pr.x * 30, 150 + (20 - pr.y) * 30);
-        block.setFillColor(clrIdentify(hold));
-        window.draw(block);
-    }
-}
-
-void Queue::drawQueue() {
-    //the left is 475, the right is 595
-    for (int i = 0; i < min(5,(int)upcoming.size()); i++) {
-        Piece queuepiece = Piece(upcoming[i],board222,window);
-        vector<Point> v = queuepiece.getCoords();
-        for (auto pr : v) {
-            sf::RectangleShape block(sf::Vector2f(30,30));
-            block.setPosition(400 + pr.x * 30,  (80 * i) + 150 + (20 - pr.y) * 30);
-            block.setFillColor(clrIdentify(upcoming[i]));
-            window.draw(block);
-        }
-    }
-}
-
-void Queue::draw() {
-    drawQueue();
-    drawHold();
-}
 
 void Queue::holdPiece() {
     if (hold.empty()) {

@@ -1,54 +1,128 @@
 //
 // Created by admin on 10/9/2024.
 //
-#include <bits/stdc++.h>
-using namespace std;
-#include <SFML/graphics.hpp>
 #include "board.h"
+#include "piece.h"
 
-sf::Color clrIdentify(string s) {
-    if (s == "#") return sf::Color::Black;
-    if (s == "Z") return {255,0,0};
-    if (s== "O") return {255,255,0};
-    if (s == "S") return {0, 255, 0};
-    if (s == "J") return {0,0,255};
-    if (s == "L") return {255, 165, 0};
-    if (s=="I") return {0, 255, 255};
-    if (s=="T") return {160, 32, 240};
-    return {128, 128, 128};
-}
+namespace Cattris {
+    uint32_t& Board::operator [] (int index) {
+        assert(index > -1 && index < 10);
+        return this->board[index];
+    }
 
-void Board::draw() {
-    for (int y = 19; y >= 0; y--) {
-        for (int x = 0; x < 10; x++) {
-            sf::RectangleShape block(sf::Vector2f(30,30));
-            block.setPosition(150 + x * 30, 150 + (20 - y) * 30);
-            block.setFillColor(clrIdentify(coloredBoard[y][x]));
-            window.draw(block);
+    bool Board::operator == (const Board& other) {
+        for (int i=0;i<10;i++) {
+            if (this->board[i] != other.board[i]) return false;
+        }
+        return true;
+    }
+
+    void Board::set(const int8_t x, const int8_t y) {
+        assert(y < 25);
+        this->board[x] &= (static_cast<uint32_t>(1) << y);
+    }
+
+    bool Board::get(const int8_t x, const int8_t y) {
+        return (this->board[x] >> y) & static_cast<uint32_t>(1);
+    }
+
+    void Board::getHeightArray(uint8_t height[10]) {
+        for (int i=0;i<10;i++) {
+            height[i] = 32 - countl_zero(this->board[i]);
         }
     }
-}
 
-void Board::clearLines() {
-    Board newboard = Board(window);
-    int ctr=0;
-    for (int y=0; y<21; y++) {
-        bool fullLine = false;
-        if ((~bitBoard & ((bitset<250>("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111111111"))<<(10*y))).none()) {
-            fullLine = true;
+    bool Board::isSet(const int8_t x, int8_t y) {
+        return get(x,y);
+    }
+
+    bool Board::isTspin(Piece &p) {
+
+    }
+
+    uint32_t Board::getMask() {
+        uint32_t mask = this->board[0];
+        for (int i=1;i<10;i++) {
+            mask &= this -> board[i];
         }
-        if (!fullLine) {
-            bitset<250> row = bitBoard & ((bitset<250>("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111111111"))<<(10*y));
-            row >>= y*10;
-            row <<= ctr*10;
-            newboard.bitBoard |= row;
-            for (int x=0;x<10;x++) {
-                newboard.coloredBoard[ctr][x] = coloredBoard[y][x];
+        return mask;
+    }
+
+    uint8_t Board::fullLines() {
+        return popcount(getMask());
+    }
+
+    void Board::clearLines() {
+
+    }
+
+    void Board::print() {
+        string ret;
+        for (int i = 24; i >= 0; i--) {
+            for (int j = 0; j < 10; j++) {
+                ret += (this->board[j] >> i & 1 ? "#" : ".");
+                if (9 - j) ret += " | ";
             }
-            ctr++;
+            ret += "\n";
+        }
+        cout << ret << "\n";
+    }
+
+    void CollisionMap::populate(Board &board, PIECE piece) {
+        memset(this->map,0,sizeof(this->map));
+        for (uint8_t rot=static_cast<uint8_t>(ROTATION::NORTH);rot<4;rot++) {
+            for (uint8_t mino=0;mino<4;mino++) {
+                //x offset and y offset, negate those
+                for (uint8_t x=0;x<10;x++) {
+                    if (x+CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][0] >= 10) this->map[rot][x]|=UINT32_MAX;
+                    if(CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][1]>=0)this->map[rot][x]|=board.board[x+CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][0]]>>CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][1];
+                    else this->map[rot][x]|=(~((~static_cast<uint32_t>(0)) << abs(CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][1]))) | board.board[x+CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][0]]<<abs(CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][1]);
+                }
+            }
         }
     }
-    bitBoard = newboard.bitBoard;
-    coloredBoard = newboard.coloredBoard;
-}
 
+    bool CollisionMap::colliding(const int8_t x, const int8_t y, ROTATION rot, PIECE piece) {
+
+    }
+
+    bool CollisionMap::colliding(Piece &p) {
+
+    }
+
+    void CollisionMap::print(int rot) {
+        string ret;
+        for (int i = 24; i >= 0; i--) {
+            for (int j = 0; j < 10; j++) {
+                ret += (this->map[rot][j] >> i & 1 ? "#" : ".");
+                if (9 - j) ret += " | ";
+            }
+            ret += "\n";
+        }
+        cout << ret << "\n";
+    }
+
+    void PosMap::clear() {
+
+    }
+
+    void PosMap::set(const int8_t x, const int8_t y, ROTATION r, bool value) {
+
+    }
+
+    bool PosMap::get(const int8_t x, const int8_t y, ROTATION r) {
+
+    }
+
+    void GameBoard::clear() {
+
+    }
+
+    void GameBoard::clearLines() {
+
+    }
+
+    void GameBoard::set(int x, int y, string type) {
+
+    }
+}

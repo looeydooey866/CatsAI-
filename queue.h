@@ -18,7 +18,7 @@ struct Queue {
     deque<string> upcoming;
     string hold;
     sf::RenderWindow& window;
-    Board board222;
+    Cattris::Board board222;
 
     explicit Queue(sf::RenderWindow& w);
 
