@@ -21,6 +21,12 @@ namespace Cattris {
         public:
             void set(const int8_t x, const int8_t y);
 
+            void setfill(const int8_t x1, const int8_t y1, const int8_t x2, const int8_t y2);
+
+            void setstring(const string s, int y);
+
+            void setBigString(const string s, int y);
+
             bool get(const int8_t x, const int8_t y);
 
             void getHeightArray(uint8_t height[10]);

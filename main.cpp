@@ -1,4 +1,3 @@
-#include <bits/stdc++.h>
 #include <SFML/Graphics.hpp>
 #include <thread>
 #include <chrono>
@@ -10,20 +9,18 @@ using namespace std;
 
 int main() {
     Cattris::Board board;
-    // board.set(4,6);
-    board[4] = 64;
-    board[7] = 16;
     Cattris::CollisionMap colmap{};
+
     int tot = 0;
+    int runs = 1000000;
     auto now = chrono::high_resolution_clock::now();
     do {
-        colmap.populate(board, Cattris::PIECE::L);
+        colmap.populate(board, Cattris::PIECE::T);
         ++tot;
-    } while (duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - now).count() < 10000);
-
-    string out;
-    out += format("I did {:d} runs on average.", tot/10);
-    cout << out << endl;
+    } while (tot < runs);
+    auto end = chrono::high_resolution_clock::now();
+    using namespace chrono;
+    cout << "it took me " << duration_cast<nanoseconds>(end-now)/runs << endl;
     board.print();
     for (int i=0;i<4;i++) {
         colmap.print(i);

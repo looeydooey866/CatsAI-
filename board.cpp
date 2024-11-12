@@ -18,9 +18,33 @@ namespace Cattris {
     }
 
     void Board::set(const int8_t x, const int8_t y) {
-        assert(y < 25);
+        assert(y>=0&&y<25&&x>=0&&x<10);
         this->board[x] &= (static_cast<uint32_t>(1) << y);
     }
+
+    void Board::setfill(const int8_t x1, const int8_t y1, const int8_t x2, const int8_t y2) {
+        assert(y1>=0&&y1<25&y2>=0&&y2<25&&x1>=0&&x1<10&&x2>=0&&x2<10);
+        for (int8_t x=min(x1,x2);x<=max(x1,x2);x++) {
+            for (int8_t y=min(y1,y2);y<=max(y1,y2);y++) {
+                this->set(x,y);
+            }
+        }
+    }
+
+    void Board::setstring(const string s, int y) {
+        assert(s.size()==10 && y >= 0 && y < 25);
+        for (int i=0;i<10;i++) {
+            if (s[i]=='#') set(i,y);
+        }
+    }
+
+    void Board::setBigString(const string s, int y) {
+        assert(s.size()%10==0 && y >= 0 && y + (s.size()/10) - 1 < 25);
+        for (int i=0;i<s.size();i++) {
+            this->setstring(s.substr(i*10,10),10);
+        }
+    }
+
 
     bool Board::get(const int8_t x, const int8_t y) {
         return (this->board[x] >> y) & static_cast<uint32_t>(1);

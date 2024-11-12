@@ -1,7 +1,7 @@
 #ifndef DATA_H
 #define DATA_H
 
-#include <bits/stdc++.h>
+#include "include.h"
 #include <SFML/Graphics.hpp>
 
 namespace Cattris {
