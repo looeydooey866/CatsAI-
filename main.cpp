@@ -10,12 +10,30 @@ using namespace std;
 int main() {
     Cattris::Board board;
     Cattris::CollisionMap colmap{};
-
+    board.setBigString(
+        "0000000001"
+        "0000000010"
+        "0000000100"
+        "0000001000"
+        "0000010000"
+        "0000100000"
+        "0001000100"
+        "0010001000"
+        "0000010001"
+        "0000100010"
+        "0001000100"
+        "0010001000"
+        "0100010000"
+        "1000100000"
+        "0001000100"
+        "0000001000"
+        "0000010000",0
+    );
     int tot = 0;
     int runs = 1000000;
     auto now = chrono::high_resolution_clock::now();
     do {
-        colmap.populate(board, Cattris::PIECE::T);
+        colmap.populate(board, Cattris::PIECE::S);
         ++tot;
     } while (tot < runs);
     auto end = chrono::high_resolution_clock::now();

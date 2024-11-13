@@ -19,7 +19,7 @@ namespace Cattris {
 
     void Board::set(const int8_t x, const int8_t y) {
         assert(y>=0&&y<25&&x>=0&&x<10);
-        this->board[x] &= (static_cast<uint32_t>(1) << y);
+        this->board[x] |= (static_cast<uint32_t>(1) << y);
     }
 
     void Board::setfill(const int8_t x1, const int8_t y1, const int8_t x2, const int8_t y2) {
@@ -32,16 +32,17 @@ namespace Cattris {
     }
 
     void Board::setstring(const string s, int y) {
+        cerr << s << ' ' << y << endl;
         assert(s.size()==10 && y >= 0 && y < 25);
         for (int i=0;i<10;i++) {
-            if (s[i]=='#') set(i,y);
+            if (s[i]=='1') set(i,y);
         }
     }
 
     void Board::setBigString(const string s, int y) {
         assert(s.size()%10==0 && y >= 0 && y + (s.size()/10) - 1 < 25);
-        for (int i=0;i<s.size();i++) {
-            this->setstring(s.substr(i*10,10),10);
+        for (int i=0;i<s.size()/10;i++){
+            this->setstring(s.substr(i*10,10),(s.size()/10-i-1)+y);
         }
     }
 
@@ -96,7 +97,6 @@ namespace Cattris {
         memset(this->map,0,sizeof(this->map));
         for (uint8_t rot=static_cast<uint8_t>(ROTATION::NORTH);rot<4;rot++) {
             for (uint8_t mino=0;mino<4;mino++) {
-                //x offset and y offset, negate those
                 for (uint8_t x=0;x<10;x++) {
                     if (x+CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][0] >= 10) this->map[rot][x]|=UINT32_MAX;
                     if(CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][1]>=0)this->map[rot][x]|=board.board[x+CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][0]]>>CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][1];

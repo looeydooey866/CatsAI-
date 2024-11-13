@@ -36,12 +36,6 @@ namespace Cattris {
             bool moveLeft(Board& board, CollisionMap& colmap);
             bool moveRight(Board& board, CollisionMap& colmap);
             bool moveSD(Board& board, CollisionMap& colmap);
-            bool moveCW(Board& board);
-            bool moveCCW(Board& board);
-            bool moveLeft(Board& board);
-            bool moveRight(Board& board);
-            void moveSD(Board& board);
-            void place(Board& board);
     };
 }
 
