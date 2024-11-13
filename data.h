@@ -5,7 +5,7 @@
 #include <SFML/Graphics.hpp>
 
 namespace Cattris {
-    enum class PIECE : uint8_t {
+    enum PIECE : uint8_t {
         S,
         Z,
         I,
@@ -28,7 +28,7 @@ namespace Cattris {
         }
     }
 
-    enum class MOVE : uint8_t {
+    enum MOVE : uint8_t {
         LEFT,
         RIGHT,
         CW,
@@ -36,7 +36,7 @@ namespace Cattris {
         DROP
     };
 
-    enum class ROTATION : uint8_t {
+    enum ROTATION : uint8_t {
         NORTH,
         EAST,
         SOUTH,
@@ -90,6 +90,8 @@ namespace Cattris {
 
     constexpr int8_t CENTER_OSETS[7][4][4][2] ={
         //i'm sorry (not sorry)
+        //S Z I O L T J
+        //Gives offset from leftmost bottommost piece
         {{{0,0}, {1,0}, {1,1}, {2,1}},
         {{0,0}, {0,1}, {1,-1}, {1,0}},
         {{0,0}, {1,0}, {1,1}, {2,1}},
@@ -121,5 +123,7 @@ namespace Cattris {
     };
 #undef quad
 #undef pr
+
+    constexpr uint8_t PIECE_SYMMETRY[7] = {2,2,2,1,4,4,4};
 }
 #endif //DATA_H

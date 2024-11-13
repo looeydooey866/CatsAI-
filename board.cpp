@@ -17,12 +17,12 @@ namespace Cattris {
         return true;
     }
 
-    void Board::set(const int8_t x, const int8_t y) {
+    void Board::set(const int8_t& x, const int8_t &y) {
         assert(y>=0&&y<25&&x>=0&&x<10);
         this->board[x] |= (static_cast<uint32_t>(1) << y);
     }
 
-    void Board::setfill(const int8_t x1, const int8_t y1, const int8_t x2, const int8_t y2) {
+    void Board::setfill(const int8_t &x1, const int8_t &y1, const int8_t &x2, const int8_t &y2) {
         assert(y1>=0&&y1<25&y2>=0&&y2<25&&x1>=0&&x1<10&&x2>=0&&x2<10);
         for (int8_t x=min(x1,x2);x<=max(x1,x2);x++) {
             for (int8_t y=min(y1,y2);y<=max(y1,y2);y++) {
@@ -47,7 +47,7 @@ namespace Cattris {
     }
 
 
-    bool Board::get(const int8_t x, const int8_t y) {
+    bool Board::get(const int8_t &x, const int8_t &y) {
         return (this->board[x] >> y) & static_cast<uint32_t>(1);
     }
 
@@ -57,7 +57,7 @@ namespace Cattris {
         }
     }
 
-    bool Board::isSet(const int8_t x, int8_t y) {
+    bool Board::isSet(const int8_t &x, int8_t &y) {
         return get(x,y);
     }
 
@@ -95,23 +95,39 @@ namespace Cattris {
 
     void CollisionMap::populate(Board &board, PIECE piece) {
         memset(this->map,0,sizeof(this->map));
-        for (uint8_t rot=static_cast<uint8_t>(ROTATION::NORTH);rot<4;rot++) {
-            for (uint8_t mino=0;mino<4;mino++) {
-                for (uint8_t x=0;x<10;x++) {
-                    if (x+CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][0] >= 10) this->map[rot][x]|=UINT32_MAX;
-                    if(CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][1]>=0)this->map[rot][x]|=board.board[x+CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][0]]>>CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][1];
-                    else this->map[rot][x]|=(~((~static_cast<uint32_t>(0)) << abs(CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][1]))) | board.board[x+CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][0]]<<abs(CENTER_OSETS[static_cast<uint8_t>(piece)][rot][mino][1]);
+        uint32_t MAX_MASK = ~uint32_t(0);
+        for (uint8_t rot=0;rot<PIECE_SYMMETRY[piece];++rot){
+            for (uint8_t mino=0;mino<4;++mino) {
+                for (uint8_t x=0;x<10;++x) {
+                    int xOset = CENTER_OSETS[piece][rot][mino][0];
+                    int yOset = CENTER_OSETS[piece][rot][mino][1];
+                    if (x+xOset >= 10) {this->map[rot][x]|=MAX_MASK; continue;}
+                    if(yOset>=0)this->map[rot][x]|=board.board[x+xOset]>>yOset;
+                    else this->map[rot][x]|=(~(MAX_MASK << abs(yOset))) | board.board[x+xOset]<<abs(yOset);
                 }
             }
         }
+        for (uint8_t rot = PIECE_SYMMETRY[piece];rot<4;++rot) {
+            for (int i=0;i<10;i++)this->map[rot][i]=this->map[rot%PIECE_SYMMETRY[piece]][i];
+        }
     }
 
-    bool CollisionMap::colliding(const int8_t x, const int8_t y, ROTATION rot, PIECE piece) {
-
+    bool CollisionMap::colliding(const uint8_t& x, const uint8_t& y, ROTATION rot, PIECE piece) {
+        return this->map[rot][x]>>y&1;
     }
 
     bool CollisionMap::colliding(Piece &p) {
+        return this->map[p.facing][p.x]>>p.y&1;
+    }
 
+    uint8_t CollisionMap::height(ROTATION rot,const uint8_t& x) {
+        return uint8_t(32-countl_zero(this->map[rot][x]));
+    }
+
+    void CollisionMap::getHeightArray(ROTATION rot, uint8_t height[10]) {
+        for (int i=0;i<10;i++) {
+            height[i] = uint8_t(32-countl_zero(this->map[rot][i]));
+        }
     }
 
     void CollisionMap::print(int rot) {

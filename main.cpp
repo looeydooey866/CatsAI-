@@ -29,20 +29,7 @@ int main() {
         "0000001000"
         "0000010000",0
     );
-    int tot = 0;
-    int runs = 1000000;
-    auto now = chrono::high_resolution_clock::now();
-    do {
-        colmap.populate(board, Cattris::PIECE::S);
-        ++tot;
-    } while (tot < runs);
-    auto end = chrono::high_resolution_clock::now();
-    using namespace chrono;
-    cout << "it took me " << duration_cast<nanoseconds>(end-now)/runs << endl;
-    board.print();
-    for (int i=0;i<4;i++) {
-        colmap.print(i);
-    }
+    colmap.benchColmapAllPieces(board,10000000);
 }
 
 /*int main() {
