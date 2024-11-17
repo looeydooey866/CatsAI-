@@ -57,12 +57,50 @@ namespace Cattris {
         }
     }
 
-    bool Board::isSet(const int8_t &x, int8_t &y) {
-        return get(x,y);
+    TSPIN Board::isTspin(Piece &p) {
+        if (p.piece != PIECE::T) {
+            return TSPIN::UNKNOWN;
+        }
+
+        uint8_t corners = 0;
+        uint8_t x = p.x;
+        uint8_t y = p.y;
+#define BLX x+0
+#define BLY y+0
+#define BRX x+2
+#define BRY y+0
+#define TLX x+0
+#define TLY y+2
+#define TRX x+2
+#define TRY y+0
+
+#define try(x,y) if (x<0||x>=10||y<0||get(x,y)) corners++; \
+
+        try(BLX,BLY);
+        try(BRX,BRY);
+        try(TLX,TLY);
+        try(TRX,TRY);
+
+#undef try(x,y)
+
+        if (corners < 3) return TSPIN::UNKNOWN;
+
+        constexpr uint8_t xFac[5] = {0,2,2,0,0};
+        constexpr uint8_t yFac[5] = {2,2,0,0,2};
+
+        uint8_t facing = get(xFac[p.facing],yFac[p.facing]) + get(xFac[p.facing+1],yFac[p.facing+1]);
+
+        if (facing < 2) {
+            return TSPIN::MINI;
+        }
+        else {
+            return TSPIN::NORMAL;
+        }
     }
 
-    bool Board::isTspin(Piece &p) {
-
+    TSPIN Board::isTspin(int8_t x, int8_t y, ROTATION rotation, PIECE piece) {
+        Piece object = Piece(x,y,piece,rotation);
+        return isTspin(object);
     }
 
     uint32_t Board::getMask() {
@@ -143,10 +181,10 @@ namespace Cattris {
     }
 
     void PosMap::clear() {
-
+        memset(this->map, 0, sizeof this->map);
     }
 
-    void PosMap::set(const int8_t x, const int8_t y, ROTATION r, bool value) {
+    void PosMap::set(const int8_t x, const int8_t y, ROTATION r) {
 
     }
 

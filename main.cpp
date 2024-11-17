@@ -1,4 +1,3 @@
-#include <SFML/Graphics.hpp>
 #include <thread>
 #include <chrono>
 #include "piece.h"
@@ -11,25 +10,44 @@ int main() {
     Cattris::Board board;
     Cattris::CollisionMap colmap{};
     board.setBigString(
-        "0000000001"
-        "0000000010"
-        "0000000100"
-        "0000001000"
-        "0000010000"
-        "0000100000"
-        "0001000100"
-        "0010001000"
-        "0000010001"
-        "0000100010"
-        "0001000100"
-        "0010001000"
-        "0100010000"
-        "1000100000"
-        "0001000100"
-        "0000001000"
-        "0000010000",0
-    );
-    colmap.benchColmapAllPieces(board,10000000);
+        "0001110000"
+        "1001111000"
+        "1000111111"
+        "1101111111",0);
+    colmap.populate(board, Cattris::PIECE::T);
+    for (int i=0;i<4;i++) colmap.print(i);
+    int ar[400][4];
+    int idx = 0;
+    for (uint8_t i=0;i<4;i++) {
+        for (int x=0;x<10;x++) {
+            for (int y=0;y<10;y++) {
+                if ((!y&&!colmap.colliding(x,y,static_cast<Cattris::ROTATION>(i),Cattris::PIECE::T) || (colmap.colliding(x,y-1,static_cast<Cattris::ROTATION>(i),Cattris::PIECE::T))&&!colmap.colliding(x,y,static_cast<Cattris::ROTATION>(i),Cattris::PIECE::T))) {
+                    ar[idx][0] = x - Cattris::PIECE_COORDINATES[5][i][0][0];
+                    ar[idx][1] = y - Cattris::PIECE_COORDINATES[5][i][0][1];
+                    ar[idx][2] = i;
+                    ar[idx][3] = Cattris::PIECE::T;
+                    ++idx;
+                }
+            }
+        }
+    }
+    for (int i=0;i<idx;i++) {
+        cout << ar[i][0] << ' ' << ar[i][1] << ' ' << ar[i][2] << ' ' << ar[i][3] << endl;
+    }
+#define sc static_cast
+    using namespace chrono;
+    int ctr=0;
+    int tot = 0;
+    auto start = high_resolution_clock::now();
+    do {
+        ++tot;
+        ++ctr;
+        ctr%=idx;
+        board.isTspin(ar[ctr][0],ar[ctr][1],sc<Cattris::ROTATION>(ar[ctr][2]),sc<Cattris::PIECE>(ar[ctr][3]));
+    } while (duration_cast<milliseconds>(high_resolution_clock::now()-start).count() < 20000);
+    cout << tot << endl;
+    cout << fixed << setprecision(20) << (long double)1000000000/((long double)tot/20) << endl;
+#undef sc
 }
 
 /*int main() {

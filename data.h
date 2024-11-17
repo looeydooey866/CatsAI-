@@ -2,7 +2,6 @@
 #define DATA_H
 
 #include "include.h"
-#include <SFML/Graphics.hpp>
 
 namespace Cattris {
     enum PIECE : uint8_t {
@@ -14,6 +13,12 @@ namespace Cattris {
         T,
         J,
         NOTHING
+    };
+
+    enum TSPIN : uint8_t {
+        UNKNOWN,
+        MINI,
+        NORMAL
     };
 
     static std::string piece_to_string(PIECE piece) {

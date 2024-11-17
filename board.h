@@ -5,10 +5,9 @@
 
 using namespace std;
 
-sf::Color clrIdentify(string s);
-
 namespace Cattris {
     class Piece;
+    class CollisionMap;
 
     class Board {
         public:
@@ -33,7 +32,9 @@ namespace Cattris {
 
             bool isSet(const int8_t& x, int8_t& y);
 
-            bool isTspin(Piece &p);
+            TSPIN isTspin(Piece &p);
+
+            TSPIN isTspin(int8_t x, int8_t y, ROTATION rotation, PIECE piece);
 
             uint32_t getMask();
 
@@ -75,7 +76,7 @@ namespace Cattris {
 
         public:
             void clear();
-            void set(const int8_t x, const int8_t y, ROTATION r, bool value);
+            void set(const int8_t x, const int8_t y, ROTATION r);
             bool get(const int8_t x, const int8_t y, ROTATION r);
     };
 
@@ -84,8 +85,6 @@ namespace Cattris {
             string coloredBoard[10][25] = {"#"};
 
         public:
-            void draw(sf::RenderWindow &window);
-
             void clearLines();
 
             void set(int x, int y, string type);

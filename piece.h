@@ -27,10 +27,6 @@ namespace Cattris {
             Piece(int8_t x, int8_t y, PIECE p, ROTATION r);
 
         public:
-            void draw(sf::RenderWindow &window);
-            void drawShadow(sf::RenderWindow &window);
-
-        public:
             bool moveCW(Board& board, CollisionMap& colmap);
             bool moveCCW(Board& board, CollisionMap& colmap);
             bool moveLeft(Board& board, CollisionMap& colmap);
