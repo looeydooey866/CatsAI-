@@ -98,9 +98,45 @@ namespace Cattris {
         }
     }
 
-    TSPIN Board::isTspin(int8_t x, int8_t y, ROTATION rotation, PIECE piece) {
-        Piece object = Piece(x,y,piece,rotation);
-        return isTspin(object);
+    TSPIN Board::isTspin(const int8_t px, const int8_t py, ROTATION rotation, PIECE piece) {
+        if (piece != PIECE::T) {
+            return TSPIN::UNKNOWN;
+        }
+
+        uint8_t corners = 0;
+        uint8_t x = px;
+        uint8_t y = py;
+#define BLX x+0
+#define BLY y+0
+#define BRX x+2
+#define BRY y+0
+#define TLX x+0
+#define TLY y+2
+#define TRX x+2
+#define TRY y+0
+
+#define try(x,y) if (x<0||x>=10||y<0||get(x,y)) corners++; \
+
+        try(BLX,BLY);
+        try(BRX,BRY);
+        try(TLX,TLY);
+        try(TRX,TRY);
+
+#undef try(x,y)
+
+        if (corners < 3) return TSPIN::UNKNOWN;
+
+        constexpr uint8_t xFac[5] = {0,2,2,0,0};
+        constexpr uint8_t yFac[5] = {2,2,0,0,2};
+
+        uint8_t facing = get(xFac[rotation],yFac[rotation]) + get(xFac[rotation+1],yFac[rotation+1]);
+
+        if (facing < 2) {
+            return TSPIN::MINI;
+        }
+        else {
+            return TSPIN::NORMAL;
+        }
     }
 
     uint32_t Board::getMask() {
