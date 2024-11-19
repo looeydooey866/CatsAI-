@@ -14,10 +14,10 @@ namespace Cattris {
         } while (tot < runs);
         auto end = chrono::high_resolution_clock::now();
         using namespace chrono;
-        for (int i=0;i<4;i++) {
-            cout << piece_to_string(piece) << endl;
-            this->print(i);
-        }
+        // for (int i=0;i<4;i++) {
+        //     cout << piece_to_string(piece) << endl;
+        //     this->print(i);
+        // }
         return (duration_cast<nanoseconds>(end-now).count())/runs;
     }
 

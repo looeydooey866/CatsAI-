@@ -5,7 +5,7 @@
 #include "piece.h"
 
 namespace Cattris {
-    uint32_t& Board::operator [] (int index) {
+    ui32& Board::operator [] (int index) {
         assert(index > -1 && index < 10);
         return this->board[index];
     }
@@ -17,15 +17,15 @@ namespace Cattris {
         return true;
     }
 
-    void Board::set(const int8_t& x, const int8_t &y) {
+    void Board::set(const i8& x, const i8 &y) {
         assert(y>=0&&y<25&&x>=0&&x<10);
-        this->board[x] |= (static_cast<uint32_t>(1) << y);
+        this->board[x] |= (static_cast<ui32>(1) << y);
     }
 
-    void Board::setfill(const int8_t &x1, const int8_t &y1, const int8_t &x2, const int8_t &y2) {
+    void Board::setfill(const i8 &x1, const i8 &y1, const i8 &x2, const i8 &y2) {
         assert(y1>=0&&y1<25&y2>=0&&y2<25&&x1>=0&&x1<10&&x2>=0&&x2<10);
-        for (int8_t x=min(x1,x2);x<=max(x1,x2);x++) {
-            for (int8_t y=min(y1,y2);y<=max(y1,y2);y++) {
+        for (i8 x=min(x1,x2);x<=max(x1,x2);x++) {
+            for (i8 y=min(y1,y2);y<=max(y1,y2);y++) {
                 this->set(x,y);
             }
         }
@@ -41,18 +41,30 @@ namespace Cattris {
 
     void Board::setBigString(const string s, int y) {
         assert(s.size()%10==0 && y >= 0 && y + (s.size()/10) - 1 < 25);
-        for (int i=0;i<s.size()/10;i++){
+        for (ui8 i=0;i<s.size()/10;i++){
             this->setstring(s.substr(i*10,10),(s.size()/10-i-1)+y);
         }
     }
 
-
-    bool Board::get(const int8_t &x, const int8_t &y) {
-        return (this->board[x] >> y) & static_cast<uint32_t>(1);
+    void Board::place(Piece &p) {
+        for (ui8 i=0;i<4;i++) {
+            set(p.x+PIECE_COORDINATES[p.piece][p.facing][i][0],p.y+PIECE_COORDINATES[p.piece][p.facing][i][1]);
+        }
     }
 
-    void Board::getHeightArray(uint8_t height[10]) {
-        for (int i=0;i<10;i++) {
+    void Board::place(i8 &x, i8 &y, PIECE piece, ROTATION rot) {
+        for (ui8 i=0;i<4;i++) {
+            set(x+PIECE_COORDINATES[piece][rot][i][0],y+PIECE_COORDINATES[piece][rot][i][1]);
+        }
+    }
+
+
+    bool Board::get(const i8 &x, const i8 &y) {
+        return (this->board[x] >> y) & static_cast<ui32>(1);
+    }
+
+    void Board::getHeightArray(ui8 height[10]) {
+        for (ui8 i=0;i<10;i++) {
             height[i] = 32 - countl_zero(this->board[i]);
         }
     }
@@ -62,9 +74,9 @@ namespace Cattris {
             return TSPIN::UNKNOWN;
         }
 
-        uint8_t corners = 0;
-        uint8_t x = p.x;
-        uint8_t y = p.y;
+        ui8 corners = 0;
+        ui8 x = p.x;
+        ui8 y = p.y;
 #define BLX x+0
 #define BLY y+0
 #define BRX x+2
@@ -74,7 +86,7 @@ namespace Cattris {
 #define TRX x+2
 #define TRY y+0
 
-#define try(x,y) if (x<0||x>=10||y<0||get(x,y)) corners++; \
+#define try(a,b) if (a<0||a>=10||b<0||get(a,b)) corners++; \
 
         try(BLX,BLY);
         try(BRX,BRY);
@@ -85,10 +97,10 @@ namespace Cattris {
 
         if (corners < 3) return TSPIN::UNKNOWN;
 
-        constexpr uint8_t xFac[5] = {0,2,2,0,0};
-        constexpr uint8_t yFac[5] = {2,2,0,0,2};
+        constexpr ui8 xFac[5] = {0,2,2,0,0};
+        constexpr ui8 yFac[5] = {2,2,0,0,2};
 
-        uint8_t facing = get(xFac[p.facing],yFac[p.facing]) + get(xFac[p.facing+1],yFac[p.facing+1]);
+        ui8 facing = get(x+xFac[p.facing],y+yFac[p.facing]) + get(x+xFac[p.facing+1],y+yFac[p.facing+1]);
 
         if (facing < 2) {
             return TSPIN::MINI;
@@ -98,14 +110,14 @@ namespace Cattris {
         }
     }
 
-    TSPIN Board::isTspin(const int8_t px, const int8_t py, ROTATION rotation, PIECE piece) {
+    TSPIN Board::isTspin(const i8 px, i8 py, ROTATION rotation, PIECE piece) {
         if (piece != PIECE::T) {
             return TSPIN::UNKNOWN;
         }
 
-        uint8_t corners = 0;
-        uint8_t x = px;
-        uint8_t y = py;
+        ui8 corners = 0;
+        ui8 x = px;
+        ui8 y = py;
 #define BLX x+0
 #define BLY y+0
 #define BRX x+2
@@ -126,10 +138,10 @@ namespace Cattris {
 
         if (corners < 3) return TSPIN::UNKNOWN;
 
-        constexpr uint8_t xFac[5] = {0,2,2,0,0};
-        constexpr uint8_t yFac[5] = {2,2,0,0,2};
+        constexpr ui8 xFac[5] = {0,2,2,0,0};
+        constexpr ui8 yFac[5] = {2,2,0,0,2};
 
-        uint8_t facing = get(xFac[rotation],yFac[rotation]) + get(xFac[rotation+1],yFac[rotation+1]);
+        ui8 facing = get(xFac[rotation],yFac[rotation]) + get(xFac[rotation+1],yFac[rotation+1]);
 
         if (facing < 2) {
             return TSPIN::MINI;
@@ -139,20 +151,55 @@ namespace Cattris {
         }
     }
 
-    uint32_t Board::getMask() {
-        uint32_t mask = this->board[0];
-        for (int i=1;i<10;i++) {
+    ui32 Board::getMask() {
+        ui32 mask = this->board[0];
+        for (ui8 i=1;i<10;i++) {
             mask &= this -> board[i];
         }
         return mask;
     }
 
-    uint8_t Board::fullLines() {
+    ui8 Board::fullLines() {
         return popcount(getMask());
     }
 
     void Board::clearLines() {
+        ui32 mask = getMask();
+        if (mask==0) {
+            return;
+        }
+        const ui8 height = countr_zero(mask);
+        mask >>= height;
+        for (ui8 i=0;i<10;i++) {
+            ui32 lo = this->board[i] & (1ULL << height - 1ULL);
+            ui32 hi = this->board[i] >> height;
+            if (mask == 0b0001) {
+                hi >>= 1;
+            }
+            else if (mask == 0b0011) {
+                hi >>= 2;
+            }
+            else if (mask == 0b0111) {
+                hi >>= 3;
+            }
+            else if (mask == 0b1111) {
+                hi >>= 4;
+            }
+            else if (mask == 0b0101) {
+                hi = ((hi >> 1) & 0b0001) | ((hi >> 3) << 1);
+            }
+            else if (mask == 0b1001) {
+                hi = ((hi >> 1) & 0b0001) | ((hi >> 2) << 1);
+            }
+            else if (mask == 0b1101) {
+                hi = ((hi >> 1) & 0b0001) | ((hi >> 4) << 1);
+            }
+            else if (mask == 0b1011) {
+                hi = ((hi >> 2) & 0b0001) | ((hi >> 4) << 1);
+            }
 
+            this->board[i] = lo | (hi << height);
+        }
     }
 
     void Board::print() {
@@ -169,38 +216,37 @@ namespace Cattris {
 
     void CollisionMap::populate(Board &board, PIECE piece) {
         memset(this->map,0,sizeof(this->map));
-        uint32_t MAX_MASK = ~uint32_t(0);
-        for (uint8_t rot=0;rot<PIECE_SYMMETRY[piece];++rot){
-            for (uint8_t mino=0;mino<4;++mino) {
-                for (uint8_t x=0;x<10;++x) {
-                    int xOset = CENTER_OSETS[piece][rot][mino][0];
-                    int yOset = CENTER_OSETS[piece][rot][mino][1];
+        ui32 MAX_MASK = ~ui32(0);
+        for (ui8 rot=0;rot<PIECE_SYMMETRY[piece];++rot){
+            for (ui8 mino=0;mino<4;++mino) {
+                ui8 xOset = PIECE_COORDINATES[piece][rot][mino][0];
+                ui8 yOset = PIECE_COORDINATES[piece][rot][mino][1];
+                for (ui8 x=0;x<10;++x) {
                     if (x+xOset >= 10) {this->map[rot][x]|=MAX_MASK; continue;}
-                    if(yOset>=0)this->map[rot][x]|=board.board[x+xOset]>>yOset;
-                    else this->map[rot][x]|=(~(MAX_MASK << abs(yOset))) | board.board[x+xOset]<<abs(yOset);
+                    this->map[rot][x]|=board.board[x+xOset]>>yOset;
                 }
             }
         }
-        for (uint8_t rot = PIECE_SYMMETRY[piece];rot<4;++rot) {
+        for (ui8 rot = PIECE_SYMMETRY[piece];rot<4;++rot) {
             for (int i=0;i<10;i++)this->map[rot][i]=this->map[rot%PIECE_SYMMETRY[piece]][i];
         }
     }
 
-    bool CollisionMap::colliding(const uint8_t& x, const uint8_t& y, ROTATION rot, PIECE piece) {
-        return this->map[rot][x]>>y&1;
+    bool CollisionMap::colliding(const i8& x, const i8& y, ROTATION rot, PIECE piece) {
+        return (x >= 0 && x < 10 && y >= 0) && this->map[rot][x]>>y&1;
     }
 
     bool CollisionMap::colliding(Piece &p) {
         return this->map[p.facing][p.x]>>p.y&1;
     }
 
-    uint8_t CollisionMap::height(ROTATION rot,const uint8_t& x) {
-        return uint8_t(32-countl_zero(this->map[rot][x]));
+    ui8 CollisionMap::height(ROTATION rot,const ui8& x) {
+        return ui8(32-countl_zero(this->map[rot][x]));
     }
 
-    void CollisionMap::getHeightArray(ROTATION rot, uint8_t height[10]) {
-        for (int i=0;i<10;i++) {
-            height[i] = uint8_t(32-countl_zero(this->map[rot][i]));
+    void CollisionMap::getHeightArray(ROTATION rot, ui8 height[10]) {
+        for (ui8 i=0;i<10;i++) {
+            height[i] = ui8(32-countl_zero(this->map[rot][i]));
         }
     }
 
@@ -220,23 +266,35 @@ namespace Cattris {
         memset(this->map, 0, sizeof this->map);
     }
 
-    void PosMap::set(const int8_t x, const int8_t y, ROTATION r) {
-
+    void PosMap::set(const i8 x, const i8 y, ROTATION r) {
+        this->map[r][x][y]=true;
     }
 
-    bool PosMap::get(const int8_t x, const int8_t y, ROTATION r) {
-
+    bool PosMap::get(const i8 x, const i8 y, ROTATION r) {
+        return this->map[r][x][y];
     }
 
     void GameBoard::clear() {
-
+        memset(this->coloredBoard,'.',sizeof this->coloredBoard);
     }
 
     void GameBoard::clearLines() {
+        string ret;
+        for (ui8 y=0;y<25;y++) {
+            bool ok=true;
+            for (ui8 x=0;x<10;x++) {
+                if (this->coloredBoard[y][x]!='.') ok=false;
+            }
+            if (!ok) continue;
 
+            ret = ret + this->coloredBoard[y];
+        }
+        for (ui8 y=0;y<ret.size()/10;y++) {
+            this->coloredBoard[y] = ret.substr(y*10,10);
+        }
     }
 
-    void GameBoard::set(int x, int y, string type) {
-
+    void GameBoard::set(int x, int y, char type) {
+        this->coloredBoard[y][x]=type;
     }
 }

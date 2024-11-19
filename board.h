@@ -11,34 +11,38 @@ namespace Cattris {
 
     class Board {
         public:
-            uint32_t board[10] = {false};
+            ui32 board[10] = {false};
 
         public:
-            uint32_t& operator [] (int index);
+            ui32& operator [] (int index);
             bool operator == (const Board& other);
 
         public:
-            void set(const int8_t& x, const int8_t& y);
+            void set(const i8& x, const i8& y);
 
-            void setfill(const int8_t& x1, const int8_t& y1, const int8_t& x2, const int8_t& y2);
+            void setfill(const i8& x1, const i8& y1, const i8& x2, const i8& y2);
 
             void setstring(const string s, int y);
 
             void setBigString(const string s, int y);
 
-            bool get(const int8_t& x, const int8_t& y);
+            void place(Piece& p);
 
-            void getHeightArray(uint8_t height[10]);
+            void place(i8 &x, i8 &y, PIECE piece, ROTATION rot);
 
-            bool isSet(const int8_t& x, int8_t& y);
+            bool get(const i8& x, const i8& y);
+
+            void getHeightArray(ui8 height[10]);
+
+            bool isSet(const i8& x, i8& y);
 
             TSPIN isTspin(Piece &p);
 
-            TSPIN isTspin(int8_t x, int8_t y, ROTATION rotation, PIECE piece);
+            TSPIN isTspin(i8 x, i8 y, ROTATION rotation, PIECE piece);
 
-            uint32_t getMask();
+            ui32 getMask();
 
-            uint8_t fullLines();
+            ui8 fullLines();
 
             void clearLines();
 
@@ -47,18 +51,18 @@ namespace Cattris {
 
     class CollisionMap {
         public:
-            uint32_t map[4][10];
+            ui32 map[4][10];
 
         public:
             void populate(Board& board, PIECE piece);
 
-            bool colliding(const uint8_t& x, const uint8_t& y, ROTATION rot, PIECE piece);
+            bool colliding(const i8& x, const i8& y, ROTATION rot, PIECE piece);
 
             bool colliding(Piece &p);
 
-            uint8_t height(ROTATION rot, const uint8_t& x);
+            ui8 height(ROTATION rot, const ui8& x);
 
-            void getHeightArray(ROTATION rot, uint8_t height[10]);
+            void getHeightArray(ROTATION rot, ui8 height[10]);
 
             void print(int rot);
 
@@ -76,18 +80,18 @@ namespace Cattris {
 
         public:
             void clear();
-            void set(const int8_t x, const int8_t y, ROTATION r);
-            bool get(const int8_t x, const int8_t y, ROTATION r);
+            void set(const i8 x, const i8 y, ROTATION r);
+            bool get(const i8 x, const i8 y, ROTATION r);
     };
 
     class GameBoard {
         public:
-            string coloredBoard[10][25] = {"#"};
+            string coloredBoard[25] = {".........."};
 
         public:
             void clearLines();
 
-            void set(int x, int y, string type);
+            void set(int x, int y, char type);
 
             void clear();
     };

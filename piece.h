@@ -13,8 +13,8 @@ namespace Cattris {
 
     class Piece {
         public:
-            int8_t x = 0;
-            int8_t y = 0;
+            i8 x = 0;
+            i8 y = 0;
             PIECE piece = PIECE::NOTHING;
             ROTATION facing = ROTATION::NORTH;
 
@@ -24,14 +24,14 @@ namespace Cattris {
         public:
             Piece();
 
-            Piece(int8_t x, int8_t y, PIECE p, ROTATION r);
+            Piece(i8 x, i8 y, PIECE p, ROTATION r);
 
         public:
-            bool moveCW(Board& board, CollisionMap& colmap);
-            bool moveCCW(Board& board, CollisionMap& colmap);
-            bool moveLeft(Board& board, CollisionMap& colmap);
-            bool moveRight(Board& board, CollisionMap& colmap);
-            bool moveSD(Board& board, CollisionMap& colmap);
+            bool moveCW(CollisionMap& colmap);
+            bool moveCCW(CollisionMap& colmap);
+            bool moveLeft(CollisionMap& colmap);
+            bool moveRight(CollisionMap& colmap);
+            bool moveSD(CollisionMap& colmap);
     };
 }
 
