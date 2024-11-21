@@ -2,6 +2,7 @@
 #define DATA_H
 
 #include "include.h"
+#include <SFML/Graphics.hpp>
 typedef int_fast8_t i8;
 typedef int_fast16_t i16;
 typedef int_fast32_t i32;

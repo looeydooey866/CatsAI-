@@ -32,6 +32,8 @@ namespace Cattris {
 
             bool get(const i8& x, const i8& y);
 
+            ui8 height(ui8 x);
+
             void getHeightArray(ui8 height[10]);
 
             bool isSet(const i8& x, i8& y);
@@ -56,7 +58,7 @@ namespace Cattris {
         public:
             void populate(Board& board, PIECE piece);
 
-            bool colliding(const i8& x, const i8& y, ROTATION rot, PIECE piece);
+            bool colliding(const i8& x, const i8& y, ROTATION rot);
 
             bool colliding(Piece &p);
 
@@ -71,18 +73,6 @@ namespace Cattris {
             long long benchColmapAllPieces(Board board, int runs);
     };
 
-    class PosMap {
-        public:
-            bool map[4][10][25];
-
-        public:
-            PosMap();
-
-        public:
-            void clear();
-            void set(const i8 x, const i8 y, ROTATION r);
-            bool get(const i8 x, const i8 y, ROTATION r);
-    };
 
     class GameBoard {
         public:

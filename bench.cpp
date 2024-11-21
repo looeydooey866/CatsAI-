@@ -8,6 +8,7 @@ namespace Cattris {
     long long CollisionMap::benchColmap(Board board,PIECE piece, int runs){
         int tot = 0;
         auto now = chrono::high_resolution_clock::now();
+        vector<thread> v;
         do {
             this->populate(board, piece);
             ++tot;

@@ -14,19 +14,8 @@ int main() {
         "1001111000"
         "1000111111"
         "1101111111",0);
-    colmap.populate(board,Cattris::PIECE::T);
-    Cattris::Piece player = Cattris::Piece(3,19,Cattris::PIECE::T,Cattris::ROTATION::NORTH);
-    for (int i=0;i<10000;i++) {
-        player.moveLeft(colmap);
+    colmap.benchColmapAllPieces(board,10000000);
+    for (int i=0;i<4;i++) {
+        colmap.print(i);
     }
-    player.moveCW(colmap);
-    player.moveSD(colmap);
-    player.moveCW(colmap);
-    Cattris::TSPIN ret = board.isTspin(player);
-    if (ret==Cattris::TSPIN::NORMAL) {
-        cout << "a regular tspin has been detected burhhhh" << endl;
-    }
-    board.place(player);
-    cout << "There are " << (int)board.fullLines() << " full lines on the board" << endl;
-    board.print();
 }
