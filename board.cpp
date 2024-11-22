@@ -32,7 +32,6 @@ namespace Cattris {
     }
 
     void Board::setstring(const string s, int y) {
-        cerr << s << ' ' << y << endl;
         assert(s.size()==10 && y >= 0 && y < 25);
         for (int i=0;i<10;i++) {
             if (s[i]=='1') set(i,y);
@@ -141,7 +140,7 @@ namespace Cattris {
         const ui8 height = countr_zero(mask);
         mask >>= height;
         for (ui8 i=0;i<10;i++) {
-            ui32 lo = this->board[i] & (1ULL << height - 1ULL);
+            ui32 lo = this->board[i] & ((1ULL << height) - 1ULL);
             ui32 hi = this->board[i] >> height;
             if (mask == 0b0001) {
                 hi >>= 1;
@@ -200,33 +199,38 @@ namespace Cattris {
 
     void CollisionMap::populate(Board &board, PIECE piece) {
         memset(this->map,0,sizeof(this->map));
-        const ui32 MAX_MASK = ~ui32(0);
-
-        for (ui8 rot=0;rot<4;++rot){
-            for (ui8 mino=0;mino<4;++mino) {
-                ui8 xOset = PIECE_COORDINATES[piece][rot][mino][0];
-                ui8 yOset = PIECE_COORDINATES[piece][rot][mino][1];
-                for (ui8 x=0;x<10;x+=8) {
-                    const ui32 mask = ((x+xOset >= 10) ? MAX_MASK : board.board[x+xOset]>>yOset);
-                    this->map[rot][x]|=mask;
+        ui32 MAX_MASK = ~ui32(0);
+        for (ui8 rot = 0; rot < PIECE_SYMMETRY[piece]; ++rot) {
+            for (ui8 mino = 0; mino < 4; ++mino) {
+                i8 xOset = CENTER_OSETS[piece][rot][mino][0];
+                i8 yOset = CENTER_OSETS[piece][rot][mino][1];
+                for (ui8 x = 0; x < 10; ++x) {
+                    this->map[rot][x] |= ( (x+xOset >= 10) ? MAX_MASK : ( (yOset >= 0) ? board.board[x + xOset] >> yOset : ((1ULL << abs(yOset)) - 1) | board.board[x + xOset] << abs(yOset) ) );
                 }
             }
         }
+        for (ui8 rot = PIECE_SYMMETRY[piece]; rot < 4; ++rot) {
+            memcpy(this->map[rot],this->map[rot%PIECE_SYMMETRY[piece]],sizeof(this->map[0]));
+        }
     }
 
-    bool CollisionMap::colliding(ui8 x,ui8 y, ROTATION rot) const{
-        return (x >= 0 && x < 10 && y >= 0) && this->map[rot][x]>>y&1;
+    bool CollisionMap::colliding(i8 x,i8 y, ROTATION rot, PIECE piece) const{
+#define pc PIECE_COORDINATES
+        x += pc[piece][rot][0][0];
+        y += pc[piece][rot][0][1];
+        return (x < 0 || x >= 10 || y < 0) || (((this->map[rot][x]>>y)&1));
+#undef pc
     }
 
     bool CollisionMap::colliding(Piece &p) const{
-        return this->map[p.facing][p.x]>>p.y&1;
+        return this->map[p.facing][p.x+PIECE_COORDINATES[p.piece][p.facing][0][0]]>>(p.y+PIECE_COORDINATES[p.piece][p.facing][0][1])&1;
     }
 
-    ui8 CollisionMap::height(ROTATION rot,ui8 x) {
-        return ui8(32-countl_zero(this->map[rot][x]));
+    ui8 CollisionMap::height(ROTATION rot,ui8 x, PIECE piece) {
+        return ui8(32-countl_zero(this->map[rot][x + PIECE_COORDINATES[piece][rot][0][0]]));
     }
 
-    void CollisionMap::getHeightArray(ROTATION rot, ui8 height[10]) {
+    void CollisionMap::getHeightArray(ROTATION rot, ui8 height[10], PIECE piece) {
         for (ui8 i=0;i<10;i++) {
             height[i] = ui8(32-countl_zero(this->map[rot][i]));
         }
