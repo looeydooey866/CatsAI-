@@ -1,5 +1,5 @@
 <h1>
-  🐱 CATTRIS: a modern guideline tetris bot 🐱
+  🐱 CATTRIS: a C++ modern guideline tetris bot 🐱
 </h1>
 
 <h3>
