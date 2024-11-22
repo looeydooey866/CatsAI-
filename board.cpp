@@ -3,7 +3,6 @@
 //
 #include "board.h"
 #include "piece.h"
-#include <arm_neon.h>
 
 namespace Cattris {
     ui32& Board::operator [] (int index) {
@@ -130,6 +129,12 @@ namespace Cattris {
 
     void Board::clearLines() {
         ui32 mask = getMask();
+#ifdef X86
+        mask = ~mask;
+        for (ui8 i=0;i<10;++i) {
+            this->board[i] = _pext_u32(this->board[i], mask);
+        }
+#else
         if (mask==0) {
             return;
         }
@@ -165,13 +170,14 @@ namespace Cattris {
 
             this->board[i] = lo | (hi << height);
         }
+#endif
     }
 
     void Board::print() {
         string ret;
         for (int i=0;i<10;i++) {
             ret += "+";
-            if (9-i) ret += "---";
+            ret += "---";
         }
         ret += "+\n";
         for (int i = 24; i >= 0; i--) {
@@ -195,11 +201,12 @@ namespace Cattris {
     void CollisionMap::populate(Board &board, PIECE piece) {
         memset(this->map,0,sizeof(this->map));
         const ui32 MAX_MASK = ~ui32(0);
+
         for (ui8 rot=0;rot<4;++rot){
             for (ui8 mino=0;mino<4;++mino) {
                 ui8 xOset = PIECE_COORDINATES[piece][rot][mino][0];
                 ui8 yOset = PIECE_COORDINATES[piece][rot][mino][1];
-                for (ui8 x=0;x<10;++x) {
+                for (ui8 x=0;x<10;x+=8) {
                     const ui32 mask = ((x+xOset >= 10) ? MAX_MASK : board.board[x+xOset]>>yOset);
                     this->map[rot][x]|=mask;
                 }
@@ -207,15 +214,15 @@ namespace Cattris {
         }
     }
 
-    bool CollisionMap::colliding(const i8& x, const i8& y, ROTATION rot) {
+    bool CollisionMap::colliding(ui8 x,ui8 y, ROTATION rot) const{
         return (x >= 0 && x < 10 && y >= 0) && this->map[rot][x]>>y&1;
     }
 
-    bool CollisionMap::colliding(Piece &p) {
+    bool CollisionMap::colliding(Piece &p) const{
         return this->map[p.facing][p.x]>>p.y&1;
     }
 
-    ui8 CollisionMap::height(ROTATION rot,const ui8& x) {
+    ui8 CollisionMap::height(ROTATION rot,ui8 x) {
         return ui8(32-countl_zero(this->map[rot][x]));
     }
 
@@ -229,7 +236,7 @@ namespace Cattris {
         string ret;
         for (int i=0;i<10;i++) {
             ret += "+";
-            if (9-i) ret += "---";
+            ret += "---";
         }
         ret += "+\n";
         for (int i = 24; i >= 0; i--) {

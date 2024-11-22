@@ -14,15 +14,16 @@ namespace Cattris {
 
     class MoveGenMap {
     public:
-        bool map[4][10][25];
+        ui16 map[4][25];
 
     public:
         MoveGenMap();
 
     public:
         void clear();
-        void set(const i8 x, const i8 y, ROTATION r);
+        void set(const i8 x, const i8 y, ROTATION r, bool &value);
         bool get(const i8 x, const i8 y, ROTATION r);
+        void loadHorizontalCollisionMap(const CollisionMap &colmap, ui16 ar[4][25]);
         ui8 populate(const CollisionMap& colmap, PIECE piece);
     };
 

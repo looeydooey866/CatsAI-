@@ -5,17 +5,17 @@
 #include "board.h"
 
 using namespace std;
+using namespace Cattris;
 
 int main() {
-    Cattris::Board board;
-    Cattris::CollisionMap colmap{};
+    Board board;
+    CollisionMap colmap;
     board.setBigString(
-        "0001110000"
-        "1001111000"
-        "1000111111"
-        "1101111111",0);
-    colmap.benchColmapAllPieces(board,10000000);
-    for (int i=0;i<4;i++) {
-        colmap.print(i);
-    }
+        "1010101010"
+        "1111111111"
+        "1010101010"
+        "0101010101"
+        "1010101010"
+        "0101010101",0);
+
 }

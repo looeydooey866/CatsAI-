@@ -8,6 +8,7 @@ using namespace std;
 namespace Cattris {
     class Piece;
     class CollisionMap;
+    class MoveGenMap;
 
     class Board {
         public:
@@ -36,8 +37,6 @@ namespace Cattris {
 
             void getHeightArray(ui8 height[10]);
 
-            bool isSet(const i8& x, i8& y);
-
             TSPIN isTspin(Piece &p);
 
             TSPIN isTspin(i8 x, i8 y, ROTATION rotation, PIECE piece);
@@ -58,11 +57,11 @@ namespace Cattris {
         public:
             void populate(Board& board, PIECE piece);
 
-            bool colliding(const i8& x, const i8& y, ROTATION rot);
+            bool colliding(ui8 x, ui8 y, ROTATION rot) const;
 
-            bool colliding(Piece &p);
+            bool colliding(Piece &p) const;
 
-            ui8 height(ROTATION rot, const ui8& x);
+            ui8 height(ROTATION rot, ui8 x);
 
             void getHeightArray(ROTATION rot, ui8 height[10]);
 
@@ -71,6 +70,8 @@ namespace Cattris {
             long long benchColmap(Board board,PIECE piece, int runs);
 
             long long benchColmapAllPieces(Board board, int runs);
+
+            void loadToMovegen(MoveGenMap &mgen);
     };
 
 
