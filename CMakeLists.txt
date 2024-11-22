@@ -1,25 +1,23 @@
 cmake_minimum_required(VERSION 3.14)
 project(tetris)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20 -Ofast -march=native -funroll-loops -DX86")
 set(SOURCE_FILES main.cpp
-        piece.cpp
         board.cpp
-        queue.cpp
-        piece.h
-        queue.h
         board.h
-        point.h
+        data.h
+        draw.cpp
+        piece.cpp
+        piece.h
         queue.cpp
-        myheap.h
+        queue.h
+        bench.cpp
+        movegen.cpp
+        movegen.h
 )
 
 add_executable(tetris ${SOURCE_FILES})
-
+include_directories(/usr/local/include)
 find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
 
 target_link_libraries(tetris sfml-system sfml-window sfml-graphics sfml-audio sfml-network)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Ofast -march=native -funroll-loops -fopt-info-vec-optimized")
