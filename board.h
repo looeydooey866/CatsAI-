@@ -57,13 +57,13 @@ namespace Cattris {
         public:
             void populate(Board& board, PIECE piece);
 
-            bool colliding(ui8 x, ui8 y, ROTATION rot) const;
+            bool colliding(i8 x, i8 y, ROTATION rot, PIECE piece) const;
 
             bool colliding(Piece &p) const;
 
-            ui8 height(ROTATION rot, ui8 x);
+            ui8 height(ROTATION rot, ui8 x, PIECE piece);
 
-            void getHeightArray(ROTATION rot, ui8 height[10]);
+            void getHeightArray(ROTATION rot, ui8 height[10], PIECE piece);
 
             void print(int rot);
 

@@ -24,7 +24,7 @@ namespace Cattris {
     }
 
     bool Piece::moveLeft(CollisionMap &colmap) {
-        if (this->x + PIECE_COORDINATES[this->piece][this->facing][0][0]!= 0 && !colmap.colliding(this->x-1,this->y,this->facing)) {
+        if (this->x + PIECE_COORDINATES[this->piece][this->facing][0][0]!= 0 && !colmap.colliding(this->x-1,this->y,this->facing,this->piece)) {
             this->x --;
             return true;
         }
@@ -32,7 +32,7 @@ namespace Cattris {
     }
 
     bool Piece::moveRight(CollisionMap &colmap) {
-        if (this->x + PIECE_COORDINATES[this->piece][this->facing][0][0] != 9 && !colmap.colliding(this->x+1,this->y,this->facing)) {
+        if (this->x + PIECE_COORDINATES[this->piece][this->facing][0][0] != 9 && !colmap.colliding(this->x+1,this->y,this->facing,this->piece)) {
             this->x ++;
             return true;
         }
@@ -41,9 +41,9 @@ namespace Cattris {
 
     bool Piece::moveCW(CollisionMap &colmap) {
         auto kicks = CW_KICK_DATA[this->piece==PIECE::I][this->facing];
-        this->facing = static_cast<ROTATION>((this->facing + 1) % 4);
+        this->facing = ROTATION((this->facing + 1) % 4);
         for (ui8 i=0;i<5;i++) {
-            if (!colmap.colliding(this->x+kicks[i][0],this->y+kicks[i][1],this->facing)) {
+            if (!colmap.colliding(this->x+kicks[i][0],this->y+kicks[i][1],this->facing,this->piece)) {
                 this->x += i8(kicks[i][0]);
                 this->y += i8(kicks[i][1]);
 #ifdef LOOEYDEBUG
@@ -58,9 +58,9 @@ namespace Cattris {
 
     bool Piece::moveCCW(CollisionMap &colmap) {
         auto kicks = CCW_KICK_DATA[this->piece == PIECE::I][this->facing];
-        this->facing = static_cast<ROTATION>((this->facing + 3) % 4);
+        this->facing = ROTATION((this->facing + 3) % 4);
         for (ui8 i=0;i<5;i++) {
-            if (!colmap.colliding(this->x+kicks[i][0],this->y+kicks[i][1],this->facing)) {
+            if (!colmap.colliding(this->x+kicks[i][0],this->y+kicks[i][1],this->facing,this->piece)) {
                 this->x += i8(kicks[i][0]);
                 this->y += i8(kicks[i][1]);
 #ifdef LOOEYDEBUG
@@ -74,8 +74,8 @@ namespace Cattris {
     }
 
     bool Piece::moveSD(CollisionMap &colmap) {
-        if (this->y +PIECE_COORDINATES[this->piece][this->facing][0][1]!= colmap.height(this->facing,this->x)) {
-            this->y = colmap.height(this->facing,this->x) - PIECE_COORDINATES[this->piece][this->facing][0][1];
+        if (this->y +PIECE_COORDINATES[this->piece][this->facing][0][1]!= colmap.height(this->facing,this->x,this->piece)) {
+            this->y = colmap.height(this->facing,this->x,this->piece) - PIECE_COORDINATES[this->piece][this->facing][0][1];
             return true;
         }
         return false;
