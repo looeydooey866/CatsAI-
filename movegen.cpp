@@ -4,6 +4,7 @@
 
 #include "movegen.h"
 #include "board.h"
+#include "piece.h"
 
 namespace Cattris {
     void MoveGenMap::clear() {
@@ -15,7 +16,7 @@ namespace Cattris {
     }
 
     bool MoveGenMap::get(const i8 x, const i8 y, ROTATION r) {
-        return this->map[r][y] & (1ULL << 9) >> x;
+        return (this->map[r][y] >> (9 - x)) & 1ULL;
     }
 
     void MoveGenMap::loadHorizontalCollisionMap(const CollisionMap &colmap,ui16 ar[4][25], PIECE piece) {
@@ -28,34 +29,48 @@ namespace Cattris {
         }
     }
 
-    ui8 MoveGenMap::populate(const CollisionMap &colmap, PIECE piece) {
-        ui16 horizontalColmap[4][25];
-        loadHorizontalCollisionMap(colmap,horizontalColmap, piece);
-        //flood fill, then run a kick check from each position and move left down right, then from that a directed graph is made.
-        //from each point of the floodfill then traverse the graph (this is quite computationally expensive...)
-        //the floodfill alone can be done with bitmasks and iteration
-        //and because we are jumping from board to board by rotating the graph data structure must handle that too
-        //(msb) 000000  (board starts here) 1010101010 (lsb)
-        constexpr ui16 maxMask = (1ULL << 10 - 1);
-        auto leftdist = [&](ROTATION rot, ui8 &x, ui8 &y) -> ui8 {
-            ui16 leftMask = maxMask & (maxMask << (10 - x));
-            ui16 rowMask = leftMask & horizontalColmap[rot][y];
-            return (countr_zero(rowMask) - (10 - x));
+    ui8 MoveGenMap::populateTest(CollisionMap &colmap, PIECE piece) {
+        auto searcherSet = [&](ui16 ar[25],i8 x, i8 y) {
+            ar[y] |= (1 << 9) >> x;
         };
 
-        auto rightdist = [&](ROTATION rot, ui8 &x, ui8 &y) -> ui8 {
-            ui16 rightMask = maxMask & (maxMask >> x);
-            ui16 rowMask = rightMask & horizontalColmap[rot][y];
-            return (countl_zero(rowMask) - (6 + x));
-        };
+        ui8 res=0;
 
-        //it was worth a try at least
+        const ui16 IGNOREMAP = (1ULL << 10) - 1;
 
-        if (colmap.colliding(3,19,ROTATION::NORTH, piece)) {
+        ui16 hColmap[4][25] = {0};
+        loadHorizontalCollisionMap(colmap,hColmap, piece);
+        // for (ui8 i=0;i<4;++i) {
+        //     for (int j=24;j>=0;--j) {
+        //         cout << (int)hColmap[i][j] << endl;
+        //     }
+        //     cout << "=============" << endl;
+        // }
+        if (colmap.colliding(3,20,ROTATION::NORTH, piece)) {
             return 0;
         }
-
-        
+        ui16 searcher[25] = {0};
+        ui16 newSearcher[25] = {0};
+        Piece spawn = Piece(3,20,piece,ROTATION::NORTH);
+        for (ui8 rot=0;rot<4;++rot) {
+            if (rot) spawn.moveCW(colmap);
+            memset(searcher,0,sizeof searcher);
+            memset(newSearcher,0,sizeof searcher);
+            searcherSet(searcher,spawn.x+PIECE_COORDINATES[piece][rot][0][0],spawn.y+PIECE_COORDINATES[piece][rot][0][1]);
+            ui16 unequal = 0ULL;
+            do{
+                unequal = 0;
+                for (ui8 y=0;y<24;++y) {
+                    newSearcher[y] = (newSearcher[y] | (((searcher[y]<<1 | searcher[y]>>1)&IGNOREMAP) | searcher[y+1])) & ~hColmap[rot][y];
+                    unequal |= newSearcher[y]^searcher[y];
+                    searcher[y] |= newSearcher[y];
+                }
+            } while (unequal);
+            for (const unsigned short i : searcher) {
+                res+=__builtin_popcount(i);
+            }
+            memcpy(this->map[rot],searcher,sizeof(searcher));
+        }
+        return res;
     }
-
 }

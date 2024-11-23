@@ -3,6 +3,7 @@
 #include "data.h"
 using namespace std;
 #define LOOEYDEBUG
+#undef LOOEYDEBUG
 
 namespace Cattris {
     bool Piece::operator==(const Piece& other) {

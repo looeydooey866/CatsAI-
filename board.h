@@ -39,7 +39,7 @@ namespace Cattris {
 
             TSPIN isTspin(Piece &p);
 
-            TSPIN isTspin(i8 x, i8 y, ROTATION rotation, PIECE piece);
+            TSPIN isTspin(const i8 px, const i8 py, ROTATION rotation, PIECE piece);
 
             ui32 getMask();
 

@@ -59,7 +59,7 @@ namespace Cattris {
 
 
     bool Board::get(const i8 &x, const i8 &y) {
-        return (this->board[x] >> y) & static_cast<ui32>(1);
+        return (this->board[x] >> y) & 1;
     }
 
     ui8 Board::height(ui8 x) {
@@ -76,38 +76,28 @@ namespace Cattris {
         if (p.piece != PIECE::T) {
             return TSPIN::UNKNOWN;
         }
-        ui8 corners = 0;
-        ui8 x = p.x;
-        ui8 y = p.y;
-#define try(a,b) if (a<0||a>=10||b<0||get(a,b)) corners++;
-        try(x,y);
-        try(x+2,y);
-        try(x,y+2);
-        try(x+2,y+2);
+#define try(a,b) (a<0||a>=10||b<0||get(a,b))
+        const ui8 corners = try(p.x, p.y) + try(p.x+2, p.y) + try(p.x, p.y+2) + try(p.x+2, p.y+2);
         if (corners < 3) return TSPIN::UNKNOWN;
         constexpr ui8 xFac[5] = {0,2,2,0,0};
         constexpr ui8 yFac[5] = {2,2,0,0,2};
-        ui8 facing = get(x+xFac[p.facing],y+yFac[p.facing]) + get(x+xFac[p.facing+1],y+yFac[p.facing+1]);
+        const ui8 facing = get(p.x+xFac[p.facing],p.y+yFac[p.facing]) + get(p.x+xFac[p.facing+1],p.y+yFac[p.facing+1]);
         if (facing < 2) {
             return TSPIN::MINI;
         }
         return TSPIN::NORMAL;
     }
 
-    TSPIN Board::isTspin(const i8 px, i8 py, ROTATION rotation, PIECE piece) {
+    TSPIN Board::isTspin(const i8 px, const i8 py, const ROTATION rotation, const PIECE piece) {
         if (piece != PIECE::T) {
             return TSPIN::UNKNOWN;
         }
-        ui8 corners = 0;
-#define try(a,b) if (a<0||a>=10||b<0||get(a,b)) corners++;
-        try(px,py);
-        try(px+2,py);
-        try(px,py+2);
-        try(px+2,py+2);
+#define try(a,b) (a<0||a>=10||b<0||get(a,b))
+        const ui8 corners = try(px, py) + try(px+2, py) + try(px, py+2) + try(px+2, py+2);
         if (corners < 3) return TSPIN::UNKNOWN;
         constexpr ui8 xFac[5] = {0,2,2,0,0};
         constexpr ui8 yFac[5] = {2,2,0,0,2};
-        ui8 facing = get(px+xFac[rotation],py+yFac[rotation]) + get(px+xFac[rotation+1],py+yFac[rotation+1]);
+        const ui8 facing = get(px+xFac[rotation],py+yFac[rotation]) + get(px+xFac[rotation+1],py+yFac[rotation+1]);
         if (facing < 2) {
             return TSPIN::MINI;
         }
