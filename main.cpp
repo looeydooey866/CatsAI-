@@ -37,9 +37,12 @@ int main() {
     MoveGenMap map;
     using namespace chrono;
     ui32 ctr=0;
+    ui16 hc[4][25];
+    memset(hc,0,sizeof hc);
+    map.loadHorizontalCollisionMap(colmap,hc,PIECE::T);
     auto now = high_resolution_clock::now();
     do {
-        map.populateTest(colmap, PIECE::S);
+        map.populateTest(colmap,hc, PIECE::T);
         ++ctr;
     } while(duration_cast<milliseconds>(high_resolution_clock::now()-now).count()<1000);
     for (int i=0;i<4;i++) {

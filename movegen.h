@@ -18,10 +18,10 @@ namespace Cattris {
 
     public:
         void clear();
-        void set(const i8 x, const i8 y, ROTATION r, bool &value);
+        void set(const i8 x, const i8 y, ROTATION r, bool value);
         bool get(const i8 x, const i8 y, ROTATION r);
-        void loadHorizontalCollisionMap(const CollisionMap &colmap, ui16 ar[4][25], PIECE piece);
-        ui8 populateTest(CollisionMap& colmap, PIECE piece);
+        static void loadHorizontalCollisionMap(const CollisionMap &colmap, ui16 ar[4][25], PIECE piece);
+        ui8 populateTest(CollisionMap& colmap, ui16 hColmap[4][25], PIECE piece);
     };
 }
 #endif //MOVEGEN_H

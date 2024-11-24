@@ -12,7 +12,7 @@ namespace Cattris {
 
     Piece::Piece() {
         this->x = 3;
-        this->y = 17;
+        this->y = 20;
         this->piece=PIECE::NOTHING;
         this->facing=ROTATION::NORTH;
     }

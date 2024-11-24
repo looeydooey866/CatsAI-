@@ -11,7 +11,7 @@ namespace Cattris {
         memset(this->map, 0, sizeof this->map);
     }
 
-    void MoveGenMap::set(const i8 x, const i8 y, ROTATION r, bool &value) {
+    void MoveGenMap::set(const i8 x, const i8 y, ROTATION r, bool value) {
         this->map[r][y] |= (ui16(value) << 9) >> x;
     }
 
@@ -29,48 +29,26 @@ namespace Cattris {
         }
     }
 
-    ui8 MoveGenMap::populateTest(CollisionMap &colmap, PIECE piece) {
-        auto searcherSet = [&](ui16 ar[25],i8 x, i8 y) {
-            ar[y] |= (1 << 9) >> x;
-        };
-
-        ui8 res=0;
-
-        const ui16 IGNOREMAP = (1ULL << 10) - 1;
-
-        ui16 hColmap[4][25] = {0};
-        loadHorizontalCollisionMap(colmap,hColmap, piece);
-        // for (ui8 i=0;i<4;++i) {
-        //     for (int j=24;j>=0;--j) {
-        //         cout << (int)hColmap[i][j] << endl;
-        //     }
-        //     cout << "=============" << endl;
-        // }
+    ui8 MoveGenMap::populateTest(CollisionMap &colmap, ui16 hColmap[4][25], PIECE piece) {
         if (colmap.colliding(3,20,ROTATION::NORTH, piece)) {
             return 0;
         }
-        ui16 searcher[25] = {0};
-        ui16 newSearcher[25] = {0};
+        const ui16 IGNOREMASK = (1ULL << 10) - 1;
         Piece spawn = Piece(3,20,piece,ROTATION::NORTH);
         for (ui8 rot=0;rot<4;++rot) {
+            memset(this->map[rot],0,sizeof this->map[rot]);
             if (rot) spawn.moveCW(colmap);
-            memset(searcher,0,sizeof searcher);
-            memset(newSearcher,0,sizeof searcher);
-            searcherSet(searcher,spawn.x+PIECE_COORDINATES[piece][rot][0][0],spawn.y+PIECE_COORDINATES[piece][rot][0][1]);
+            set(spawn.x+PIECE_COORDINATES[piece][rot][0][0],spawn.y+PIECE_COORDINATES[piece][rot][0][1],ROTATION(rot),1);
             ui16 unequal = 0ULL;
             do{
                 unequal = 0;
                 for (ui8 y=0;y<24;++y) {
-                    newSearcher[y] = (newSearcher[y] | (((searcher[y]<<1 | searcher[y]>>1)&IGNOREMAP) | searcher[y+1])) & ~hColmap[rot][y];
-                    unequal |= newSearcher[y]^searcher[y];
-                    searcher[y] |= newSearcher[y];
+                    ui16 mask = (this->map[rot][y] | (((this->map[rot][y]<<1 | this->map[rot][y]>>1)&IGNOREMASK) | this->map[rot][y+1])) & ~hColmap[rot][y];
+                    unequal |= mask^this->map[rot][y];
+                    this->map[rot][y] |= mask;
                 }
             } while (unequal);
-            for (const unsigned short i : searcher) {
-                res+=__builtin_popcount(i);
-            }
-            memcpy(this->map[rot],searcher,sizeof(searcher));
         }
-        return res;
+        return 0;
     }
 }
