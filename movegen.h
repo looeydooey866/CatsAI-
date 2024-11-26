@@ -1,27 +1,41 @@
-//
-// Created by Maximus Hartanto on 21/11/24.
-//
-
 #ifndef MOVEGEN_H
 #define MOVEGEN_H
 #include "data.h"
+#include "piece.h"
 
 namespace Cattris {
     class Board;
     class CollisionMap;
-    class MoveGenMap;
     class Piece;
+    class Move;
 
-    class MoveGenMap {
-    public:
-        ui16 map[4][25] = {0};
+    class MovegenMap {
+        public:
+        bool data[4][10][25] = {false};
 
-    public:
-        void clear();
-        void set(const i8 x, const i8 y, ROTATION r, bool value);
-        bool get(const i8 x, const i8 y, ROTATION r);
-        static void loadHorizontalCollisionMap(const CollisionMap &colmap, ui16 ar[4][25], PIECE piece);
-        ui8 populateTest(CollisionMap& colmap, ui16 hColmap[4][25], PIECE piece);
+        public:
+        void set(Rotation r, int8_t x, int8_t y, PieceType p);
+        bool get(Rotation r, int8_t x, int8_t y, PieceType p);
+        bool get(Cattris::Move m);
     };
+
+    class Move {
+        public:
+        int8_t x = 0;
+        int8_t y = 0;
+        Rotation facing = Rotation::North;
+        PieceType type;
+
+        public:
+        Move(Rotation r, int8_t x, int8_t y, PieceType p);
+
+        public:
+        void normalize();
+        bool moveCCW(CollisionMap& colmap);
+        bool moveCW(CollisionMap& colmap);
+    };
+
+    std::vector<Move> Moves(Board& board, Piece& piece);
+    long long benchMovegen(Board &board, Piece &piece);
 }
 #endif //MOVEGEN_H

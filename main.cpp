@@ -1,8 +1,8 @@
 #include <thread>
 #include <chrono>
 #include "piece.h"
-#include "queue.h"
 #include "board.h"
+#include "colmap.h"
 #include "movegen.h"
 
 using namespace std;
@@ -15,41 +15,20 @@ int main() {
         ""
         "0000000000"
         "0000000000"
+        "0000000001"
+        "0000000000"
+        "1111111110"
         "0000000000"
         "0000000000"
-        "0000000000"
-        "0000000000"
-        "0000000000"
-        "0000000000"
-        "0000000000"
-        "0000000000"
-        "0000000000"
-        "0000000000"
-        "1111111100"
-        "1111111001",0
+        "0011111111"
+        "0001111111"
+        "1101111111"
+        "1001111111"
+        "1000111111"
+        "1101111111"
+        "1101111111",0
     );
-    colmap.populate(board,PIECE::S);
-    board.print();
-    for (int i=0;i<4;i++) {
-        colmap.print(i);
-    }
-
-    MoveGenMap map;
-    using namespace chrono;
-    ui32 ctr=0;
-    ui16 hc[4][25];
-    memset(hc,0,sizeof hc);
-    map.loadHorizontalCollisionMap(colmap,hc,PIECE::T);
-    auto now = high_resolution_clock::now();
-    do {
-        map.populateTest(colmap,hc, PIECE::T);
-        ++ctr;
-    } while(duration_cast<milliseconds>(high_resolution_clock::now()-now).count()<1000);
-    for (int i=0;i<4;i++) {
-        for (int j=24;j>=0;j--) {
-            cout << bitset<10>((int)map.map[i][j]) << endl;
-        }
-        if (3-i) cout << "\n==============\n";
-    }
-    cout << ">===" << ctr << "===<" << endl;
+    colmap.populate(board,PieceType::T);
+    Piece test = Piece(3,20,PieceType::T,Rotation::North);
+    benchMovegen(board,test);
 }

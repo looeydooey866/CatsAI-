@@ -2,86 +2,22 @@
 #define DATA_H
 
 #include "include.h"
-#include <SFML/Graphics.hpp>
+
 #ifdef X86
 #include <immintrin.h>
 #endif
-typedef int_fast8_t i8;
-typedef int_fast16_t i16;
-typedef int_fast32_t i32;
-typedef int_fast64_t i64;
-typedef uint_fast8_t ui8;
-typedef uint_fast16_t ui16;
-typedef uint_fast32_t ui32;
-typedef uint_fast64_t ui64;
 
 namespace Cattris {
-    enum PIECE : ui8 {
-        S,
-        Z,
-        I,
-        O,
-        L,
-        T,
-        J,
-        NOTHING
-    };
-
-    enum TSPIN : ui8 {
-        UNKNOWN,
-        MINI,
-        NORMAL
-    };
-
-    static std::string piece_to_string(PIECE piece) {
-        switch (piece) {
-            case PIECE::S: return "S";
-            case PIECE::Z: return "Z";
-            case PIECE::I: return "I";
-            case PIECE::O: return "O";
-            case PIECE::L: return "L";
-            case PIECE::T: return "T";
-            case PIECE::J: return "J";
-        }
-    }
-
-    static char piece_to_char(PIECE piece) {
-        switch(piece) {
-            case PIECE::S: return 'S';
-            case PIECE::Z: return 'Z';
-            case PIECE::I: return 'I';
-            case PIECE::O: return 'O';
-            case PIECE::L: return 'L';
-            case PIECE::T: return 'T';
-            case PIECE::J: return 'J';
-        }
-    }
-
-    enum MOVE : ui8 {
-        LEFT,
-        RIGHT,
-        CW,
-        CCW,
-        DROP
-    };
-
-    enum ROTATION : ui8 {
-        NORTH,
-        EAST,
-        SOUTH,
-        WEST
-    };
-
 #define pr(x,y) {(x),(y)}
 
-    constexpr i8 CW_KICK_DATA[2][4][5][2] = {
-        {
+    constexpr int8_t CW_KICK_DATA[2][4][5][2] = {
+        { //S Z L T J
             {pr(0, 0),pr(-1, 0),pr(-1, 1),pr(0, -2),pr(-1, -2)},
             {pr(0, 0),pr(1, 0),pr(1, -1),pr(0, 2),pr(1, 2)},
             {pr(0, 0),pr(1, 0),pr(1, 1),pr(0, -2),pr(1, -2)},
             {pr(0, 0),pr(-1, 0),pr(-1, -1),pr(0, 2),pr(-1, 2)}
         },
-        {
+        { //I
             {pr(0, 0),pr(-2, 0),pr(1, 0),pr(-2, -1),pr(1, 2)},
             {pr(0, 0),pr(-1, 0),pr(2, 0),pr(-1, 2),pr(2, -1)},
             {pr(0, 0),pr(2, 0),pr(-1, 0),pr(2, 1),pr(-1, -2)},
@@ -89,14 +25,14 @@ namespace Cattris {
         }
     };
 
-    constexpr i8 CCW_KICK_DATA[2][4][5][2] = {
-        {
+    constexpr int8_t CCW_KICK_DATA[2][4][5][2] = {
+        { //S Z L T J
             {pr(0, 0),pr(1, 0),pr(1, 1),pr(0, -2),pr(1, -2)},
             {pr(0, 0),pr(1, 0),pr(1, -1),pr(0, 2),pr(1, 2)},
             {pr(0, 0),pr(-1, 0),pr(-1, 1),pr(0, -2),pr(-1, -2)},
             {pr(0, 0),pr(-1, 0),pr(-1, -1),pr(0, 2),pr(-1, 2)}
         },
-        {
+        { //I
             {pr(0, 0),pr(-1, 0),pr(2, 0),pr(-1, 2),pr(2, -1)},
             {pr(0, 0),pr(2, 0),pr(-1, 0),pr(2, 1),pr(-1, -2)},
             {pr(0, 0),pr(1, 0),pr(-2, 0),pr(1, -2),pr(-2, 1)},
@@ -106,57 +42,129 @@ namespace Cattris {
 
 #define quad(a,b,c,d,e,f,g,h) {pr((a),(b)),pr((c),(d)),pr((e),(f)),pr((g),(h))}
 
-    constexpr i8 PIECE_COORDINATES[7][4][4][2] = {
+    constexpr int8_t PIECE_COORDINATES[7][4][4][2] = {
+        //I S Z O L T J
         //first coordinate is the leftmost, and bottommost point
-        //S Z I O L T J
-        {quad(0, 1, 1, 1, 1, 2, 2, 2),quad(1, 1, 1, 2, 2, 0, 2, 1),quad(0, 0, 1, 0, 1, 1, 2, 1),quad(0, 1, 0, 2, 1, 1, 1, 0)},
-        {quad(0, 2, 1, 2, 1, 1, 2, 1),quad(1, 0, 1, 1, 2, 1, 2, 2),quad(0, 1, 1, 1, 1, 0, 2, 0),quad(0, 0, 0, 1, 1, 1, 1, 2) },
-        {quad(0, 2, 1, 2, 2, 2, 3, 2),quad(2, 0, 2, 1, 2, 2, 2, 3),quad(0, 1, 1, 1, 2, 1, 3, 1),quad(1, 0, 1, 1, 1, 2, 1, 3) },
-        {quad(1, 1, 1, 2, 2, 1, 2, 2),quad(1, 1, 1, 2, 2, 1, 2, 2),quad(1, 1, 1, 2, 2, 1, 2, 2),quad(1, 1, 1, 2, 2, 1, 2, 2) },
-        {quad(0, 1, 1, 1, 2, 1, 2, 2),quad(1, 0, 1, 1, 1, 2, 2, 0),quad(0, 0, 0, 1, 1, 1, 2, 1),quad(0, 2, 1, 0, 1, 1, 1, 2) },
-        {quad(0, 1, 1, 1, 1, 2, 2, 1),quad(1, 0, 1, 1, 1, 2, 2, 1),quad(0, 1, 1, 1, 2, 1, 1, 0),quad(0, 1, 1, 0, 1, 1, 1, 2) },
-        {quad(0, 1, 0, 2, 1, 1, 2, 1),quad(1, 0, 1, 1, 1, 2, 2, 2),quad(0, 1, 1, 1, 2, 1, 2, 0),quad(0, 0, 1, 0, 1, 1, 1, 2)  }
+
+        { //I
+            quad(0, 2, 1, 2, 2, 2, 3, 2),
+            quad(2, 0, 2, 1, 2, 2, 2, 3),
+            quad(0, 1, 1, 1, 2, 1, 3, 1),
+            quad(1, 0, 1, 1, 1, 2, 1, 3)
+        },
+
+        { //S
+            quad(0, 1, 1, 1, 1, 2, 2, 2),
+            quad(1, 1, 1, 2, 2, 0, 2, 1),
+            quad(0, 0, 1, 0, 1, 1, 2, 1),
+            quad(0, 1, 0, 2, 1, 1, 1, 0)
+        },
+
+        { //Z
+            quad(0, 2, 1, 2, 1, 1, 2, 1),
+            quad(1, 0, 1, 1, 2, 1, 2, 2),
+            quad(0, 1, 1, 1, 1, 0, 2, 0),
+            quad(0, 0, 0, 1, 1, 1, 1, 2)
+        },
+
+        { //O
+            quad(1, 1, 1, 2, 2, 1, 2, 2),
+            quad(1, 1, 1, 2, 2, 1, 2, 2),
+            quad(1, 1, 1, 2, 2, 1, 2, 2),
+            quad(1, 1, 1, 2, 2, 1, 2, 2)
+        },
+
+        { //L
+            quad(0, 1, 1, 1, 2, 1, 2, 2),
+            quad(1, 0, 1, 1, 1, 2, 2, 0),
+            quad(0, 0, 0, 1, 1, 1, 2, 1),
+            quad(0, 2, 1, 0, 1, 1, 1, 2)
+        },
+
+        { //T
+            quad(0, 1, 1, 1, 1, 2, 2, 1),
+            quad(1, 0, 1, 1, 1, 2, 2, 1),
+            quad(0, 1, 1, 1, 2, 1, 1, 0),
+            quad(0, 1, 1, 0, 1, 1, 1, 2)
+        },
+
+        { //J
+            quad(0, 1, 0, 2, 1, 1, 2, 1),
+            quad(1, 0, 1, 1, 1, 2, 2, 2),
+            quad(0, 1, 1, 1, 2, 1, 2, 0),
+            quad(0, 0, 1, 0, 1, 1, 1, 2)
+        }
     };
-    constexpr i8 CENTER_OSETS[7][4][4][2] = {
-        //S Z I O L T J
+
+    constexpr int8_t CENTER[7][4][2] = {
+        //leftmost, bottommost point of the piece
+        //I S Z O L T J
+
+        { //I
+            {0,2},{2,0},{0,1},{1,0}
+        },
+        { //S
+            {0,1},{1,1},{0,0},{0,1}
+        },
+        { //Z
+            {0,2},{1,0},{0,1},{0,0}
+        },
+        { //O
+            {1,1},{1,1},{1,1},{1,1}
+        },
+        { //L
+            {0,1},{1,0},{0,0},{0,2}
+        },
+        { //T
+            {0,1},{1,0},{0,1},{0,1}
+        },
+        { //J
+            {0,1},{1,0},{0,1},{0,0}
+        }
+    };
+
+    constexpr int8_t CENTER_OSETS[7][4][4][2] = {
+        //I S Z O L T J
         //Gives offset from leftmost bottommost piece
-        {
-            {{0, 0}, {1, 0}, {1, 1}, {2, 1}},
-            {{0, 0}, {0, 1}, {1, -1}, {1, 0}},
-            {{0, 0}, {1, 0}, {1, 1}, {2, 1}},
-            {{0, 0}, {0, 1}, {1, 0}, {1, -1}}
-        },
-        {
-            {{0, 0}, {1, 0}, {1, -1}, {2, -1}},
-            {{0, 0}, {0, 1}, {1, 1}, {1, 2}},
-            {{0, 0}, {1, 0}, {1, -1}, {2, -1}},
-            {{0, 0}, {0, 1}, {1, 1}, {1, 2}}
-        },
-        {
+
+        { //I
             {{0, 0}, {1, 0}, {2, 0}, {3, 0}},
             {{0, 0}, {0, 1}, {0, 2}, {0, 3}},
             {{0, 0}, {1, 0}, {2, 0}, {3, 0}},
             {{0, 0}, {0, 1}, {0, 2}, {0, 3}}
         },
-        {
+        { //S
+            {{0, 0}, {1, 0}, {1, 1}, {2, 1}},
+            {{0, 0}, {0, 1}, {1, -1}, {1, 0}},
+            {{0, 0}, {1, 0}, {1, 1}, {2, 1}},
+            {{0, 0}, {0, 1}, {1, 0}, {1, -1}}
+        },
+        { //Z
+            {{0, 0}, {1, 0}, {1, -1}, {2, -1}},
+            {{0, 0}, {0, 1}, {1, 1}, {1, 2}},
+            {{0, 0}, {1, 0}, {1, -1}, {2, -1}},
+            {{0, 0}, {0, 1}, {1, 1}, {1, 2}}
+        },
+
+        { //O
             {{0, 0}, {0, 1}, {1, 0}, {1, 1}},
             {{0, 0}, {0, 1}, {1, 0}, {1, 1}},
             {{0, 0}, {0, 1}, {1, 0}, {1, 1}},
             {{0, 0}, {0, 1}, {1, 0}, {1, 1}}
         },
-        {
+        { //L
             {{0, 0}, {1, 0}, {2, 0}, {2, 1}},
             {{0, 0}, {0, 1}, {0, 2}, {1, 0}},
             {{0, 0}, {0, 1}, {1, 1}, {2, 1}},
             {{0, 0}, {1, -2}, {1, -1}, {1, 0}}
         },
-        {
+        { //T
             {{0, 0}, {1, 0}, {1, 1}, {2, 0}},
             {{0, 0}, {0, 1}, {0, 2}, {1, 1}},
             {{0, 0}, {1, 0}, {2, 0}, {1, -1}},
             {{0, 0}, {1, -1}, {1, 0}, {1, 1}}
         },
-        {
+        { //J
             {{0, 0}, {0, 1}, {1, 0}, {2, 0}},
             {{0, 0}, {0, 1}, {0, 2}, {1, 2}},
             {{0, 0}, {1, 0}, {2, 0}, {2, -1}},
@@ -167,6 +175,7 @@ namespace Cattris {
 #undef quad
 #undef pr
 
-    constexpr ui8 PIECE_SYMMETRY[7] = {2,2,2,1,4,4,4};
+    //I S Z O L T J
+    constexpr uint8_t PieceType_SYMMETRY[7] = {2, 2, 2, 1, 4, 4, 4};
 }
 #endif //DATA_H

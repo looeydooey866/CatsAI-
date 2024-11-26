@@ -1,7 +1,3 @@
-//
-// Created by Maximus Hartanto on 22/8/24.
-//
-
 #ifndef INCLUDE_H
 #define INCLUDE_H
 // C++ includes used for precompiling -*- C++ -*-

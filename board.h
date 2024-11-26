@@ -2,26 +2,26 @@
 #ifndef BOARD_H
 #define BOARD_H
 #include "data.h"
+#include "piece.h"
 
 using namespace std;
 
 namespace Cattris {
     class Piece;
     class CollisionMap;
-    class MoveGenMap;
 
     class Board {
         public:
-            ui32 board[10] = {false};
+            uint32_t board[10] = {false};
 
         public:
-            ui32& operator [] (int index);
+            uint32_t& operator [] (int index);
             bool operator == (const Board& other);
 
         public:
-            void set(const i8& x, const i8& y);
+            void set(const int8_t& x, const int8_t& y);
 
-            void setfill(const i8& x1, const i8& y1, const i8& x2, const i8& y2);
+            void setfill(const int8_t& x1, const int8_t& y1, const int8_t& x2, const int8_t& y2);
 
             void setstring(const string s, int y);
 
@@ -29,62 +29,27 @@ namespace Cattris {
 
             void place(Piece& p);
 
-            void place(i8 &x, i8 &y, PIECE piece, ROTATION rot);
+            void place(int8_t &x, int8_t &y, PieceType piece, Rotation rot);
 
-            bool get(const i8& x, const i8& y);
+            bool get(const int8_t& x, const int8_t& y);
 
-            ui8 height(ui8 x);
+            uint8_t height(uint8_t x);
 
-            void getHeightArray(ui8 height[10]);
+            void getHeightArray(uint8_t height[10]);
 
-            TSPIN isTspin(Piece &p);
+            Tspin isTspin(Piece &p);
 
-            TSPIN isTspin(const i8 px, const i8 py, ROTATION rotation, PIECE piece);
+            Tspin isTspin(const int8_t px, const int8_t py, Rotation rotation, PieceType piece);
 
-            ui32 getMask();
+            uint32_t getMask();
 
-            ui8 fullLines();
+            uint8_t fullLines();
 
             void clearLines();
 
             void print();
     };
 
-    class CollisionMap {
-        public:
-            ui32 map[4][10];
 
-        public:
-            void populate(Board& board, PIECE piece);
-
-            bool colliding(i8 x, i8 y, ROTATION rot, PIECE piece) const;
-
-            bool colliding(Piece &p) const;
-
-            ui8 height(ROTATION rot, ui8 x, PIECE piece);
-
-            void getHeightArray(ROTATION rot, ui8 height[10], PIECE piece);
-
-            void print(int rot);
-
-            long long benchColmap(Board board,PIECE piece, int runs);
-
-            long long benchColmapAllPieces(Board board, int runs);
-
-            void loadToMovegen(MoveGenMap &mgen);
-    };
-
-
-    class GameBoard {
-        public:
-            string coloredBoard[25] = {".........."};
-
-        public:
-            void clearLines();
-
-            void set(int x, int y, char type);
-
-            void clear();
-    };
 }
 #endif

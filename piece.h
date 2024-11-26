@@ -2,21 +2,27 @@
 // Created by admin on 10/10/2024.
 //
 
-#ifndef PIECE_H
-#define PIECE_H
+#ifndef PieceType_H
+#define PieceType_H
 
 #include "data.h"
 
 namespace Cattris {
+    enum PieceType {I, S, Z, O, L, T, J, Nothing};
+
+    enum Rotation {North, East, South, West};
+
+    enum Tspin {UNKNOWN, MINI, NORMAL};
+
     class Board;
     class CollisionMap;
 
     class Piece {
         public:
-            i8 x = 0;
-            i8 y = 0;
-            PIECE piece = PIECE::NOTHING;
-            ROTATION facing = ROTATION::NORTH;
+            int8_t x = 3;
+            int8_t y = 20;
+            PieceType piece = PieceType::Nothing;
+            Rotation facing = Rotation::North;
 
         public:
             bool operator==(const Piece &other);
@@ -24,14 +30,17 @@ namespace Cattris {
         public:
             Piece();
 
-            Piece(i8 x, i8 y, PIECE p, ROTATION r);
+            Piece(int8_t x, int8_t y, PieceType p, Rotation r);
 
         public:
+            uint8_t centerX();
+            uint8_t centerY();
             bool moveCW(CollisionMap& colmap);
             bool moveCCW(CollisionMap& colmap);
             bool moveLeft(CollisionMap& colmap);
             bool moveRight(CollisionMap& colmap);
             bool moveSD(CollisionMap& colmap);
+            void normalize();
     };
 }
 

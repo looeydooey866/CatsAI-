@@ -1,54 +1,123 @@
-//
-// Created by Maximus Hartanto on 21/11/24.
-//
-
 #include "movegen.h"
 #include "board.h"
 #include "piece.h"
+#include "colmap.h"
 
 namespace Cattris {
-    void MoveGenMap::clear() {
-        memset(this->map, 0, sizeof this->map);
+    void MovegenMap::set(Rotation r,int8_t x, int8_t y, PieceType p) {
+        this->data[r][x+CENTER[p][r][0]][y+CENTER[p][r][1]] = true;
     }
 
-    void MoveGenMap::set(const i8 x, const i8 y, ROTATION r, bool value) {
-        this->map[r][y] |= (ui16(value) << 9) >> x;
+    bool MovegenMap::get(Rotation r, int8_t x, int8_t y, PieceType p) {
+        return this->data[r][x+CENTER[p][r][0]][y+CENTER[p][r][1]];
     }
 
-    bool MoveGenMap::get(const i8 x, const i8 y, ROTATION r) {
-        return (this->map[r][y] >> (9 - x)) & 1ULL;
+    bool MovegenMap::get(Move m) {
+        return this->data[m.facing][m.x+CENTER[m.type][m.facing][0]][m.y+CENTER[m.type][m.facing][1]];
     }
 
-    void MoveGenMap::loadHorizontalCollisionMap(const CollisionMap &colmap,ui16 ar[4][25], PIECE piece) {
-        for (ui8 rot=0;rot<4;++rot) {
-            for (ui8 x=0;x<10;++x) {
-                for (ui8 y=0;y<25;++y) {
-                    ar[rot][y] |= (colmap.colliding(x,y,(ROTATION)rot,piece) << 9) >> x;
-                }
+    Move::Move(Rotation r, int8_t x, int8_t y, PieceType p) {
+        this->facing = r;
+        this->x = x;
+        this->y = y;
+        this->type = p;
+    }
+
+    void Move::normalize() {
+        if (type==PieceType::I||type==PieceType::S||type==PieceType::Z) {
+            if (this->facing==Rotation::South) {
+                this->facing=Rotation::North;
+                this->y--;
+            }
+            if (this->facing==Rotation::West) {
+                this->facing=Rotation::East;
+                this->x--;
             }
         }
+        else if (type==PieceType::O) {
+            this->facing=Rotation::North;
+        }
     }
 
-    ui8 MoveGenMap::populateTest(CollisionMap &colmap, ui16 hColmap[4][25], PIECE piece) {
-        if (colmap.colliding(3,20,ROTATION::NORTH, piece)) {
-            return 0;
+    bool Move::moveCCW(CollisionMap &colmap) {
+        auto kicks = CCW_KICK_DATA[this->type==PieceType::I][this->facing];
+        this->facing = Rotation((this->facing + 3) % 4);
+        for (uint8_t i=0;i<5;++i) {
+            if (!colmap.colliding(this->x+kicks[i][0],this->y+kicks[i][1],this->facing,this->type)) {
+                this->x += kicks[i][0];
+                this->y += kicks[i][1];
+                return true;
+            }
         }
-        const ui16 IGNOREMASK = (1ULL << 10) - 1;
-        Piece spawn = Piece(3,20,piece,ROTATION::NORTH);
-        for (ui8 rot=0;rot<4;++rot) {
-            memset(this->map[rot],0,sizeof this->map[rot]);
-            if (rot) spawn.moveCW(colmap);
-            set(spawn.x+PIECE_COORDINATES[piece][rot][0][0],spawn.y+PIECE_COORDINATES[piece][rot][0][1],ROTATION(rot),1);
-            ui16 unequal = 0ULL;
-            do{
-                unequal = 0;
-                for (ui8 y=0;y<24;++y) {
-                    ui16 mask = (this->map[rot][y] | (((this->map[rot][y]<<1 | this->map[rot][y]>>1)&IGNOREMASK) | this->map[rot][y+1])) & ~hColmap[rot][y];
-                    unequal |= mask^this->map[rot][y];
-                    this->map[rot][y] |= mask;
-                }
-            } while (unequal);
+        this->facing = Rotation((this->facing+1)%4);
+        return false;
+    }
+
+    bool Move::moveCW(CollisionMap &colmap) {
+        auto kicks = CW_KICK_DATA[this->type==PieceType::I][this->facing];
+        this->facing = Rotation((this->facing + 1) % 4);
+        for (uint8_t i=0;i<5;++i) {
+            if (!colmap.colliding(this->x+kicks[i][0],this->y+kicks[i][1],this->facing,this->type)) {
+                this->x += kicks[i][0];
+                this->y += kicks[i][1];
+                return true;
+            }
         }
-        return 0;
+        this->facing = Rotation((this->facing+3)%4);
+        return false;
+    }
+
+    vector<Move> Moves(Board& board, Piece& piece) {
+        vector<Move> moves;
+        moves.reserve(256);
+
+        CollisionMap colmap;
+        colmap.populate(board, piece.piece);
+
+        MovegenMap map;
+        MovegenMap result;
+
+        vector<Move> queue;
+        queue.reserve(128);
+        queue.emplace_back(Rotation::North,3,20,piece.piece);
+
+        while(!queue.empty()) {
+            Move cur = queue.back();
+            queue.pop_back();
+            if (!colmap.colliding(cur.x-1,cur.y,cur.facing,piece.piece)&&!map.get(cur.facing,cur.x-1,cur.y,piece.piece)) {
+                map.set(cur.facing,cur.x-1,cur.y,piece.piece);
+                queue.emplace_back(cur.facing,cur.x-1,cur.y,piece.piece);
+            }
+
+            if (!colmap.colliding(cur.x+1,cur.y,cur.facing,piece.piece)&&!map.get(cur.facing,cur.x+1,cur.y,piece.piece)) {
+                map.set(cur.facing,cur.x+1,cur.y,piece.piece);
+                queue.emplace_back(cur.facing,cur.x+1,cur.y,piece.piece);
+            }
+
+            Move ccw = cur;
+            if (ccw.moveCCW(colmap) && !map.get(ccw.facing,ccw.x,ccw.y,piece.piece)) {
+                map.set(ccw.facing,ccw.x,ccw.y,piece.piece);
+                queue.emplace_back(ccw.facing,ccw.x,ccw.y,piece.piece);
+            }
+
+            Move cw = cur;
+            if (cw.moveCW(colmap) && !map.get(cw.facing,cw.x,cw.y,piece.piece)) {
+                map.set(cw.facing,cw.x,cw.y,piece.piece);
+                queue.emplace_back(cw.facing,cw.x,cw.y,piece.piece);
+            }
+
+            cur.y = colmap.height(cur.facing,cur.x,cur.y,piece.piece)-CENTER[piece.piece][cur.facing][1];
+            if (!map.get(cur.facing,cur.x,cur.y,cur.type) ) {
+                map.set(cur.facing,cur.x,cur.y,piece.piece);
+                queue.emplace_back(cur.facing,cur.x,cur.y,piece.piece);
+            }
+
+            cur.normalize();
+            if (!result.get(cur.facing,cur.x,cur.y,piece.piece)) {
+                result.set(cur.facing,cur.x,cur.y,piece.piece);
+                moves.emplace_back(cur.facing,cur.x,cur.y,piece.piece);
+            }
+        }
+        return moves;
     }
 }

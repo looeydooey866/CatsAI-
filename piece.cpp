@@ -1,9 +1,8 @@
 #include "piece.h"
 #include "board.h"
 #include "data.h"
+#include "colmap.h"
 using namespace std;
-#define LOOEYDEBUG
-#undef LOOEYDEBUG
 
 namespace Cattris {
     bool Piece::operator==(const Piece& other) {
@@ -13,19 +12,27 @@ namespace Cattris {
     Piece::Piece() {
         this->x = 3;
         this->y = 20;
-        this->piece=PIECE::NOTHING;
-        this->facing=ROTATION::NORTH;
+        this->piece=PieceType::Nothing;
+        this->facing=Rotation::North;
     }
 
-    Piece::Piece(i8 x, i8 y, PIECE p, ROTATION r) {
+    Piece::Piece(int8_t x, int8_t y, PieceType p, Rotation r) {
         this->x=x;
         this->y=y;
         this->piece=p;
         this->facing=r;
     }
 
+    uint8_t Piece::centerX() {
+        return this->x + CENTER[this->piece][this->facing][0];
+    }
+
+    uint8_t Piece::centerY() {
+        return this->y + CENTER[this->piece][this->facing][1];
+    }
+
     bool Piece::moveLeft(CollisionMap &colmap) {
-        if (this->x + PIECE_COORDINATES[this->piece][this->facing][0][0]!= 0 && !colmap.colliding(this->x-1,this->y,this->facing,this->piece)) {
+        if (centerX() != 0 && !colmap.colliding(this->x-1,this->y,this->facing,this->piece)) {
             this->x --;
             return true;
         }
@@ -33,52 +40,62 @@ namespace Cattris {
     }
 
     bool Piece::moveRight(CollisionMap &colmap) {
-        if (this->x + PIECE_COORDINATES[this->piece][this->facing][0][0] != 9 && !colmap.colliding(this->x+1,this->y,this->facing,this->piece)) {
-            this->x ++;
+        if (centerX() != 9 && !colmap.colliding(this->x+1,this->y,this->facing,this->piece)) {
+            this->x++;
             return true;
         }
         return false;
     }
 
     bool Piece::moveCW(CollisionMap &colmap) {
-        auto kicks = CW_KICK_DATA[this->piece==PIECE::I][this->facing];
-        this->facing = ROTATION((this->facing + 1) % 4);
-        for (ui8 i=0;i<5;i++) {
+        auto kicks = CW_KICK_DATA[this->piece==PieceType::I][this->facing];
+        this->facing = Rotation((this->facing + 1) % 4);
+        for (uint8_t i=0;i<5;i++) {
             if (!colmap.colliding(this->x+kicks[i][0],this->y+kicks[i][1],this->facing,this->piece)) {
-                this->x += i8(kicks[i][0]);
-                this->y += i8(kicks[i][1]);
-#ifdef LOOEYDEBUG
-                cout << "Kick! " << i+1 << endl;
-#endif
+                this->x += int8_t(kicks[i][0]);
+                this->y += int8_t(kicks[i][1]);
                 return true;
             }
         }
-        this->facing = static_cast<ROTATION>((this->facing+3)%4);
+        this->facing = static_cast<Rotation>((this->facing+3)%4);
         return false;
     }
 
     bool Piece::moveCCW(CollisionMap &colmap) {
-        auto kicks = CCW_KICK_DATA[this->piece == PIECE::I][this->facing];
-        this->facing = ROTATION((this->facing + 3) % 4);
-        for (ui8 i=0;i<5;i++) {
+        auto kicks = CCW_KICK_DATA[this->piece == PieceType::I][this->facing];
+        this->facing = Rotation((this->facing + 3) % 4);
+        for (uint8_t i=0;i<5;i++) {
             if (!colmap.colliding(this->x+kicks[i][0],this->y+kicks[i][1],this->facing,this->piece)) {
-                this->x += i8(kicks[i][0]);
-                this->y += i8(kicks[i][1]);
-#ifdef LOOEYDEBUG
-                cout << "Kick! " << i+1 << endl;
-#endif
+                this->x += int8_t(kicks[i][0]);
+                this->y += int8_t(kicks[i][1]);
                 return true;
             }
         }
-        this->facing = static_cast<ROTATION>((this->facing+1)%4);
+        this->facing = static_cast<Rotation>((this->facing+1)%4);
         return false;
     }
 
     bool Piece::moveSD(CollisionMap &colmap) {
-        if (this->y +PIECE_COORDINATES[this->piece][this->facing][0][1]!= colmap.height(this->facing,this->x,this->piece)) {
-            this->y = colmap.height(this->facing,this->x,this->piece) - PIECE_COORDINATES[this->piece][this->facing][0][1];
+        if (centerY()!= colmap.height(this->facing,this->x,this->y,this->piece)) {
+            this->y = colmap.height(this->facing,this->x,this->y,this->piece) - CENTER[this->piece][this->facing][1];
             return true;
         }
         return false;
+    }
+
+    void Piece::normalize() {
+        if (this->piece==PieceType::I||this->piece==PieceType::S||this->piece==PieceType::Z) {
+            if (this->facing==Rotation::South) {
+                this->facing=Rotation::North;
+                this->y--;
+            }
+            if (this->facing==Rotation::West) {
+                this->facing=Rotation::East;
+                this->x--;
+            }
+        }
+        else if (this->piece==PieceType::O) {
+            this->facing=Rotation::North;
+        }
     }
 }
