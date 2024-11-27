@@ -33,6 +33,10 @@ namespace Cattris {
         return this->map[p.facing][p.x+PIECE_COORDINATES[p.piece][p.facing][0][0]]>>(p.y+PIECE_COORDINATES[p.piece][p.facing][0][1])&1;
     }
 
+    uint32_t CollisionMap::column(Rotation rot, int8_t x) const {
+        return this->map[rot][x];
+    }
+
     uint8_t CollisionMap::height(Rotation rot,int8_t x, int8_t y, PieceType piece) {
         return 32 - countl_zero(((1 << y+CENTER[piece][rot][1]) - 1) & this->map[rot][x+CENTER[piece][rot][0]]);
     }

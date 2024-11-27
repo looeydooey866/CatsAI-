@@ -48,4 +48,6 @@ namespace Cattris {
         cout << "In the board, there are " << int(Moves(board, piece).size()) <<" available moves."<< "\n";
         return nodes;
     }
+
+
 }

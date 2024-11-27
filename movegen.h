@@ -11,12 +11,17 @@ namespace Cattris {
 
     class MovegenMap {
         public:
-        bool data[4][10][25] = {false};
+        uint32_t data[4][10] = {0};
 
         public:
         void set(Rotation r, int8_t x, int8_t y, PieceType p);
-        bool get(Rotation r, int8_t x, int8_t y, PieceType p);
-        bool get(Cattris::Move m);
+        bool get(Rotation r, int8_t x, int8_t y, PieceType p) const;
+        bool get(Cattris::Move m) const;
+        uint32_t column(Rotation r, int8_t x) const;
+        void softdrop(Rotation r, CollisionMap& colmap);
+        void spread(Rotation r, CollisionMap& colmap);
+
+        void removeDuplicates(PieceType p);
     };
 
     class Move {
@@ -37,5 +42,6 @@ namespace Cattris {
 
     std::vector<Move> Moves(Board& board, Piece& piece);
     long long benchMovegen(Board &board, Piece &piece);
+    void flip(uint32_t &mask);
 }
 #endif //MOVEGEN_H

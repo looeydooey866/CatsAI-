@@ -23,6 +23,8 @@ class CollisionMap {
 
             bool colliding(Piece &p) const;
 
+            uint32_t column(Rotation rot, int8_t x) const;
+
             uint8_t height(Rotation rot, int8_t x, int8_t y, PieceType piece);
 
             void getHeightArray(Rotation rot, uint8_t height[10], PieceType piece);
