@@ -178,4 +178,15 @@ namespace Cattris {
             this->setstring(s.substr(i * 10, 10), (s.size() / 10 - i - 1) + y);
         }
     }
+
+    void printbin(uint32_t x) {
+        uint32_t msb = UINT32_MAX ^ (UINT32_MAX >> 1);
+        string ret;
+        ret += "0b";
+        while (msb) {
+            ret += (x&msb?"1":"0");
+            msb>>=1;
+        }
+        cout << ret << "\n";
+    }
 }

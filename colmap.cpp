@@ -29,7 +29,7 @@ namespace Cattris {
         return (x < 0 || x >= 10 || y < 0) || (((this->map[rot][x]>>y)&1));
     }
 
-    bool CollisionMap::colliding(Piece &p) const{
+    bool CollisionMap::colliding(const Piece &p) const{
         return this->map[p.facing][p.x+PIECE_COORDINATES[p.piece][p.facing][0][0]]>>(p.y+PIECE_COORDINATES[p.piece][p.facing][0][1])&1;
     }
 

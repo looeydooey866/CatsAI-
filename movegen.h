@@ -18,8 +18,9 @@ namespace Cattris {
         bool get(Rotation r, int8_t x, int8_t y, PieceType p) const;
         bool get(Cattris::Move m) const;
         uint32_t column(Rotation r, int8_t x) const;
-        void softdrop(Rotation r, CollisionMap& colmap);
-        void spread(Rotation r, CollisionMap& colmap);
+        bool softdrop(Rotation r, CollisionMap& colmap);
+        bool spread(Rotation r, const CollisionMap& colmap);
+        bool rotate(Rotation r, const CollisionMap& colmap);
 
         void removeDuplicates(PieceType p);
     };
@@ -40,7 +41,7 @@ namespace Cattris {
         bool moveCW(CollisionMap& colmap);
     };
 
-    std::vector<Move> Moves(Board& board, Piece& piece);
+    std::vector<Move> Moves(Board& board, const Piece& piece);
     long long benchMovegen(Board &board, Piece &piece);
     void flip(uint32_t &mask);
 }

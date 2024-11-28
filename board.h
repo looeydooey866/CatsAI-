@@ -50,6 +50,6 @@ namespace Cattris {
             void print();
     };
 
-
+    void printbin(uint32_t x);
 }
 #endif

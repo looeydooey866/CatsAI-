@@ -21,7 +21,7 @@ class CollisionMap {
 
             bool colliding(int8_t x, int8_t y, Rotation rot, PieceType piece) const;
 
-            bool colliding(Piece &p) const;
+            bool colliding(const Piece &p) const;
 
             uint32_t column(Rotation rot, int8_t x) const;
 

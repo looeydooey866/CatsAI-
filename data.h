@@ -3,9 +3,7 @@
 
 #include "include.h"
 
-#ifdef X86
 #include <immintrin.h>
-#endif
 
 namespace Cattris {
 #define pr(x,y) {(x),(y)}
