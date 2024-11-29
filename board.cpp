@@ -189,4 +189,54 @@ namespace Cattris {
         }
         cout << ret << "\n";
     }
+
+    void fancyprint(uint32_t x) {
+        uint32_t msb = UINT32_MAX ^ (UINT32_MAX >> 1);
+        string ret;
+        while (msb) {
+            if (31-int(countl_zero(msb))<10) ret+=" ";
+            ret += std::to_string(int(31 - int(countl_zero(msb))));
+            ret += "|";
+            ret += (x&msb?"[]":"  ");
+            ret+="|";
+            ret+="\n";
+            msb>>=1;
+        }
+        cout << ret << "\n";
+    }
+
+    void fancyprint(uint32_t x[10]) {
+        uint32_t msb = UINT32_MAX ^ (UINT32_MAX >> 1);
+        string ret;
+        while (msb) {
+            if (31-int(countl_zero(msb))<10) ret+=" ";
+            ret += std::to_string(int(31-int(countl_zero(msb))));
+            ret += "|";
+            for (int i=0;i<10;++i) {
+                ret += (x[i]&msb?"[]":"  ");
+            }
+            ret += "|";
+            ret+="\n";
+            msb>>=1;
+        }
+        cout << ret << "\n";
+    }
+
+    void fancyprint(uint32_t x[10], uint32_t y[10]) {
+        uint32_t msb = UINT32_MAX ^ (UINT32_MAX >> 1);
+        string ret;
+        while (msb) {
+            if (31-int(countl_zero(msb))<10) ret+=" ";
+            ret += std::to_string(int(31-int(countl_zero(msb))));
+            ret += "|";
+            for (int i=0;i<10;++i) {
+                ret += (x[i]&msb?"[]":
+                    (y[i]&msb?"{}":"  "));
+            }
+            ret += "|";
+            ret+="\n";
+            msb>>=1;
+        }
+        cout << ret << "\n";
+    }
 }

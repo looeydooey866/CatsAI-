@@ -51,5 +51,8 @@ namespace Cattris {
     };
 
     void printbin(uint32_t x);
+    void fancyprint(uint32_t x);
+    void fancyprint(uint32_t x[10]);
+    void fancyprint(uint32_t x[10], uint32_t y[10]);
 }
 #endif
