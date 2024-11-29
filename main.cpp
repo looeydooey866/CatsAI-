@@ -27,6 +27,6 @@ int main() {
         "1101111111"
         "1101111111",0
     );
-    Piece test = Piece(3,20,PieceType::T,Rotation::North);
+    Piece test = Piece(0,4,PieceType::T,Rotation::North);
     Moves(board,test);
 }

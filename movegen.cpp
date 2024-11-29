@@ -57,14 +57,67 @@ namespace Cattris {
         return ok;
     }
 
-    bool MovegenMap::rotate(Rotation r, const CollisionMap &colmap) {
+    bool MovegenMap::rotate(Rotation r, const CollisionMap &colmap, const PieceType p) {
         bool ok = false;
 
         //cw
+        const Rotation cw = Rotation((r+1)%4);
+        MovegenMap avail;
+        memcpy(avail.data,this->data,sizeof avail.data);
 
-        // TODO shift the board the kick coords, and then not with colmap, SIMD-able :D
+        for (uint8_t i=0;i<5;++i) {
+            const int8_t xOset = CW_KICK_DATA[p==0][r][i][0];
+            const int8_t yOset = CW_KICK_DATA[p==0][r][i][1];
+
+            for (int8_t x = 0; x < 10; ++x) {
+                //removes non-colliding and move it to the original map
+                if (x-xOset >= 10 || x-xOset < 0) {
+                    avail.data[cw][x] = 0;
+                    continue;
+                }
+
+                uint32_t col = avail.column(cw,x-xOset);
+                if (yOset > 0) {
+                    col <<= yOset;
+                }
+                else {
+                    col >>= -yOset;
+                }
+
+                uint32_t colliding = col & colmap.column(cw,x);
+                this->data[cw][x] |= col & ~(colliding);
+                avail.data[cw][x] = colliding;
+            }
+        }
 
         //ccw
+        memcpy(avail.data,this->data,sizeof avail.data);
+        const Rotation ccw = Rotation((r + 3) % 4);
+        for (uint8_t i=0;i<5;++i) {
+            const int8_t xOset = CCW_KICK_DATA[p==0][r][i][0];
+            const int8_t yOset = CCW_KICK_DATA[p==0][r][i][1];
+
+            for (int8_t x = 0; x < 10; ++x) {
+                //removes non-colliding and move it to the original map
+                if (x-xOset >= 10 || x-xOset < 0) {
+                    avail.data[ccw][x] = 0;
+                    continue;
+                }
+
+                uint32_t col = avail.column(ccw,x-xOset);
+                if (yOset > 0) {
+                    col <<= yOset;
+                }
+                else {
+                    col >>= -yOset;
+                }
+
+                uint32_t colliding = col & colmap.column(ccw,x);
+                this->data[ccw][x] |= col & ~(colliding);
+                avail.data[ccw][x] = colliding;
+            }
+        }
+        return true;
     }
 
     void flip(uint32_t &mask) {
@@ -128,8 +181,16 @@ namespace Cattris {
             return {};
         }
 
+        cout << "not colliding \n";
+
         MovegenMap pieces;
         pieces.set(piece.facing,piece.x,piece.y,piece.piece);
+
+        pieces.rotate(Rotation::North, colmap, piece.piece);
+
+        for (uint8_t x=0;x<10;++x) {
+            printbin(pieces.data[3][x]);
+        }
 
         return moves;
     }

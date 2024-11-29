@@ -20,7 +20,7 @@ namespace Cattris {
         uint32_t column(Rotation r, int8_t x) const;
         bool softdrop(Rotation r, CollisionMap& colmap);
         bool spread(Rotation r, const CollisionMap& colmap);
-        bool rotate(Rotation r, const CollisionMap& colmap);
+        bool rotate(Rotation r, const CollisionMap &colmap, const PieceType p);
 
         void removeDuplicates(PieceType p);
     };
