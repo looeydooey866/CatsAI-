@@ -45,6 +45,7 @@ namespace Cattris {
         } while (chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - now).count() < 1000)
         ;
         cout << "I ran the function " << ctr << " times.\nIt generated " << nodes << " nodes in a second.\n";
+        cout << nodes/1'000'000 << "mnps\n";
         cout << "In the board, there are " << int(Moves(board, piece).size()) <<" available moves."<< "\n";
         return nodes;
     }

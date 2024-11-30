@@ -30,7 +30,7 @@ namespace Cattris {
         for (uint8_t x=0;x<10;++x) {
             uint32_t bot = (this->data[r][x] ^ (this->data[r][x] >> 1)) & this->data[r][x];
             uint32_t mask = (colmap.map[r][x] & (~colmap.map[r][x] + bot)) - bot;
-            ok |= this->data[r][x] ^ mask;
+            ok |= (mask & ~(this->data[r][x]))!=0ULL;
             this->data[r][x] |= mask;
         }
 
@@ -45,13 +45,13 @@ namespace Cattris {
         bool ok = false;
         for (uint8_t x=1;x<10;++x) {
             uint32_t mask = this->data[r][x-1] & ~colmap.column(r,x);
-            ok |= this->data[r][x] ^ mask;
+            ok |= (mask & ~(this->data[r][x])) != 0ULL;
             this->data[r][x] |= mask;
         }
 
         for (int8_t x=8;x>=0;--x) {
             uint32_t mask = this->data[r][x+1] & ~colmap.column(r,x);
-            ok |= this->data[r][x] ^ mask;
+            ok |= (mask & ~(this->data[r][x]))!=0ULL;
             this->data[r][x] |= mask;
         }
         return ok;
@@ -59,6 +59,8 @@ namespace Cattris {
 
     bool MovegenMap::rotate(Rotation r, const CollisionMap &colmap, const PieceType p) {
         bool ok = false;
+        uint32_t before[4][10];
+        memcpy(before, this->data, sizeof before);
         uint32_t avail[10];
         const Rotation cw = Rotation((r+1)%4);
         const Rotation ccw = Rotation((r+3)%4);
@@ -73,7 +75,6 @@ namespace Cattris {
                 if (x-xOset >= 10 || x-xOset < 0) {
                     continue;
                 }
-
                 uint32_t col = avail[x-xOset];
                 if (yOset >= 0) {
                     col <<= yOset;
@@ -81,10 +82,7 @@ namespace Cattris {
                 else {
                     col >>= -yOset;
                 }
-
-                uint32_t colliding = col & colmap.column(cw,x);
-
-                ok |= (this->data[cw][x] ^ (col & ~(colliding)));
+                uint32_t colliding = col & colmap.map[cw][x];
                 this->data[cw][x] |= col & ~(colliding);
                 if (yOset >= 0) {
                     colliding >>= yOset;
@@ -98,7 +96,7 @@ namespace Cattris {
 
         //ccw
 
-        memcpy(avail,this->data[r],sizeof avail);
+        memcpy(avail, this->data[r], sizeof avail);
 
         for (uint8_t i=0;i<5;++i) {
             const int8_t xOset = CCW_DELTA[p][r][0] + CCW_KICK_DATA[p==0][r][i][0];
@@ -108,25 +106,30 @@ namespace Cattris {
                 if (x-xOset >= 10 || x-xOset < 0) {
                     continue;
                 }
-
                 uint32_t col = avail[x-xOset];
                 if (yOset >= 0) {
                     col <<= yOset;
                 }
                 else {
-                    col >>= abs(yOset);
+                    col >>= -yOset;
                 }
-                uint32_t colliding = col & colmap.column(ccw,x);
-                col &= ~(colliding);
-                ok |= (this->data[cw][x] ^ (col & ~(colliding)));
+                uint32_t colliding = col & colmap.map[ccw][x];
                 this->data[ccw][x] |= col & ~(colliding);
                 if (yOset >= 0) {
                     colliding >>= yOset;
                 }
                 else {
-                    colliding <<= abs(yOset);
+                    colliding <<= -yOset;
                 }
                 avail[x-xOset] = colliding;
+            }
+        }
+        for (uint8_t i=0;i<4;i++) {
+            for (uint8_t x=0;x<10;x++) {
+                if (before[i][x] != this->data[i][x]) {
+                    ok = true;
+                    break;
+                }
             }
         }
         return ok;
@@ -181,6 +184,7 @@ namespace Cattris {
             this->facing=Rotation::North;
         }
     }
+    //12 + 17 + 12 + 19 =
 
     vector<Move> Moves(Board& board, const Piece& piece) {
         vector<Move> moves;
@@ -196,9 +200,28 @@ namespace Cattris {
         MovegenMap pieces;
         pieces.set(piece.facing,piece.x,piece.y,piece.piece);
 
-        for (uint8_t i=0;i<4;i++) {
-            fancyprint(pieces.data[i],board.board);
+        bool gogogo = false;
+        do {
+            gogogo = false;
+            for (uint8_t i = 0; i < 4; i++) {
+                gogogo |= pieces.softdrop(Rotation(i), colmap);
+                gogogo |= pieces.spread(Rotation(i), colmap);
+                gogogo |= pieces.rotate(Rotation(i),colmap,piece.piece);
+            }
+        } while(gogogo);
+
+        pieces.removeDuplicates(piece.piece);
+        for (uint8_t rot=0;rot<4;++rot) {
+            for (uint8_t x=0;x<10;++x) {
+                pieces.data[rot][x] &= colmap.map[rot][x] << 1 | 1;
+                for (uint8_t y=0;y<32;++y) {
+                    if (pieces.data[rot][x]>>y&1ULL) {
+                        moves.emplace_back(Rotation(rot),x-CENTER[piece.piece][rot][0],y-CENTER[piece.piece][rot][1],piece.piece);
+                    }
+                }
+            }
         }
         return moves;
     }
+
 }
