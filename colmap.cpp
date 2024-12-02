@@ -38,7 +38,7 @@ namespace Cattris {
     }
 
     uint8_t CollisionMap::height(Rotation rot,int8_t x, int8_t y, PieceType piece) {
-        return 32 - countl_zero(((1 << y+CENTER[piece][rot][1]) - 1) & this->map[rot][x+CENTER[piece][rot][0]]);
+        return 32 - countl_zero(((1 << (y+CENTER[piece][rot][1]) - 1) & this->map[rot][x+CENTER[piece][rot][0]]));
     }
 
     void CollisionMap::getHeightArray(Rotation rot, uint8_t height[10], PieceType piece) {

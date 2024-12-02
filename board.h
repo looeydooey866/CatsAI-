@@ -48,6 +48,8 @@ namespace Cattris {
             void clearLines();
 
             void print();
+
+            void clear();
     };
 
     void printbin(uint32_t x);

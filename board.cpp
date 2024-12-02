@@ -156,6 +156,10 @@ namespace Cattris {
         cout << ret << "\n";
     }
 
+    void Board::clear() {
+        memset(this->board,0,sizeof this->board);
+    }
+
     void Board::setfill(const int8_t &x1, const int8_t &y1, const int8_t &x2, const int8_t &y2) {
         assert(y1>=0&&y1<25&y2>=0&&y2<25&&x1>=0&&x1<10&&x2>=0&&x2<10);
         for (int8_t x = min(x1, x2); x <= max(x1, x2); x++) {

@@ -5,11 +5,11 @@
 
 namespace Cattris {
     void MovegenMap::set(const Rotation r, const int8_t x, const int8_t y, const PieceType p) {
-        this->data[r][x+CENTER[p][r][0]] |= 1ULL << y+CENTER[p][r][1];
+        this->data[r][x+CENTER[p][r][0]] |= 1ULL << (y+CENTER[p][r][1]);
     }
 
     bool MovegenMap::get(const Rotation r, const int8_t x, const int8_t y, const PieceType p) const {
-        return this->data[r][x+CENTER[p][r][0]] >> y+CENTER[p][r][1];
+        return this->data[r][x+CENTER[p][r][0]] >> (y+CENTER[p][r][1]);
     }
 
     bool MovegenMap::get(Move m) const {
@@ -71,26 +71,16 @@ namespace Cattris {
         for (uint8_t i=0;i<5;++i) {
             const int8_t xOset = CW_DELTA[p][r][0] + CW_KICK_DATA[p==0][r][i][0];
             const int8_t yOset = CW_DELTA[p][r][1] + CW_KICK_DATA[p==0][r][i][1];
-            for (int8_t x = 0; x < 10; ++x) {
-                if (x-xOset >= 10 || x-xOset < 0) {
-                    continue;
-                }
-                uint32_t col = avail[x-xOset];
-                if (yOset >= 0) {
-                    col <<= yOset;
-                }
-                else {
-                    col >>= -yOset;
-                }
-                uint32_t colliding = col & colmap.map[cw][x];
-                this->data[cw][x] |= col & ~(colliding);
-                if (yOset >= 0) {
-                    colliding >>= yOset;
-                }
-                else {
-                    colliding <<= -yOset;
-                }
-                avail[x-xOset] = colliding;
+            const int8_t posy = (yOset>0?yOset:0);
+            const int8_t negy = (yOset<0?abs(yOset):0);
+            const int8_t start = (xOset>0?xOset:0);
+            const int8_t end = (xOset<0?10+xOset:10);
+#define iter for (int8_t x=start;x<end;++x)
+            uint32_t cols[10];
+            iter{
+                cols[x] = (avail[x-xOset]<<posy)>>negy;
+                this->data[cw][x] |= cols[x] & ~(colmap.map[cw][x]);
+                avail[x-xOset] = ((cols[x]&colmap.map[cw][x])>>posy)<<negy;
             }
         }
 
@@ -101,11 +91,9 @@ namespace Cattris {
         for (uint8_t i=0;i<5;++i) {
             const int8_t xOset = CCW_DELTA[p][r][0] + CCW_KICK_DATA[p==0][r][i][0];
             const int8_t yOset = CCW_DELTA[p][r][1] +  CCW_KICK_DATA[p==0][r][i][1];
-
-            for (int8_t x = 0; x < 10; ++x) {
-                if (x-xOset >= 10 || x-xOset < 0) {
-                    continue;
-                }
+            const int8_t start = (xOset>0?xOset:0);
+            const int8_t end = (xOset<0?10+xOset:10);
+            for (int8_t x = start; x < end; ++x) {
                 uint32_t col = avail[x-xOset];
                 if (yOset >= 0) {
                     col <<= yOset;
@@ -145,7 +133,11 @@ namespace Cattris {
             (mask << 3 & 0x20202020) |
             (mask << 5 & 0x40404040) |
             (mask << 7 & 0x80808080);
-        mask = byteswap(byteChunk);
+        mask =
+        (byteChunk>>24 & 0x000000FF) |
+        (byteChunk>>8  & 0x0000FF00) |
+        (byteChunk<<8  & 0x00FF0000) |
+        (byteChunk<<24 & 0xFF000000);
     }
 
     void MovegenMap::removeDuplicates(const PieceType p) {
