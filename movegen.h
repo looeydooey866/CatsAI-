@@ -10,32 +10,37 @@ namespace Cattris {
     class Move;
 
     class MovegenMap {
-        public:
+    public:
         uint32_t data[4][10] = {0};
 
-        public:
+    public:
         void set(Rotation r, int8_t x, int8_t y, PieceType p);
         bool get(Rotation r, int8_t x, int8_t y, PieceType p) const;
         bool get(Cattris::Move m) const;
         uint32_t column(Rotation r, int8_t x) const;
-        bool softdrop(Rotation r, CollisionMap& colmap);
-        bool spread(Rotation r, const CollisionMap& colmap);
-        bool rotate(Rotation r, const CollisionMap &colmap, const PieceType p);
+
+        void softdrop(CollisionMap &colmap);
+
+        void softdrop(uint8_t x, Rotation r, CollisionMap &colmap);
+
+        void spread(const CollisionMap &colmap);
+
+        void rotate(const CollisionMap &colmap, const PieceType p);
 
         void removeDuplicates(PieceType p);
     };
 
     class Move {
-        public:
+    public:
         int8_t x = 0;
         int8_t y = 0;
         Rotation facing = Rotation::North;
         PieceType type;
 
-        public:
+    public:
         Move(Rotation r, int8_t x, int8_t y, PieceType p);
 
-        public:
+    public:
         void normalize();
         bool moveCCW(CollisionMap& colmap);
         bool moveCW(CollisionMap& colmap);
